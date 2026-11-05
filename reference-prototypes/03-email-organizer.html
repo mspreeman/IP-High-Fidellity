@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="A grayscale inbox prototype featuring a fictional manager at Example Company.">
+  <title>LuMaCo Prototype: Email Organizer</title>
+  <style>
+    :root { --ink:#222; --muted:#595959; --line:#888; --wash:#f3f3f3; --sketch:"Segoe Print","Bradley Hand","Comic Sans MS","Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; scroll-padding-top:24px; }
+    body { margin:0; background:#fff; color:var(--ink); font-family:"Segoe UI",Arial,sans-serif; font-size:19px; line-height:1.5; }
+    button, input, textarea { font:inherit; color:inherit; }
+    button, a { -webkit-tap-highlight-color:transparent; }
+    a { color:inherit; text-underline-offset:4px; }
+    a:focus-visible, button:focus-visible, textarea:focus-visible, input:focus-visible { outline:3px solid #222; outline-offset:5px; }
+    button { cursor:pointer; }
+    h1,h2,h3,p { margin:0; }
+    h1,h2,h3,.sketch,.flow { font-family:var(--sketch); }
+    .page { max-width:1400px; margin:auto; padding:38px 42px 48px; }
+    .eyebrow { font-size:15px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; }
+    .page-header { border-bottom:2px dashed var(--ink); padding-bottom:26px; }
+    .header-top { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px; }
+    .prototype-label { border:1px dashed var(--line); padding:5px 10px; font-size:15px; white-space:nowrap; }
+    h1 { font-size:clamp(30px,3.2vw,43px); line-height:1.3; font-weight:700; }
+    .scenario { margin-top:14px; font-size:22px; }
+    .context { color:var(--muted); margin-top:8px; font-size:17px; }
+    .flow-nav { display:flex; align-items:center; flex-wrap:wrap; gap:14px; padding-top:20px; font-size:18px; }
+    .flow-nav a { text-decoration-style:dashed; }
+    .screen { margin-top:28px; scroll-margin-top:24px; }
+    .screen-title { display:flex; align-items:flex-start; gap:15px; margin-bottom:16px; }
+    .step { width:44px; height:44px; flex:0 0 44px; display:grid; place-items:center; border:2px dashed var(--ink); font:700 25px var(--sketch); }
+    h2 { font-size:29px; line-height:1.4; }
+    .screen-description { font-size:18px; color:var(--muted); margin-top:2px; }
+    .window { border:2px dashed var(--ink); }
+    .window-bar { border-bottom:1px dashed var(--line); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; background:var(--wash); font-size:16px; }
+    .window-bar strong { font-size:18px; }
+    .inbox-heading { padding:20px 22px 14px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .inbox-heading h3 { font-size:27px; }
+    .small-note { font-size:16px; color:var(--muted); }
+    .mail-list { list-style:none; padding:0 22px 12px; margin:0; }
+    .mail-row { display:grid; grid-template-columns:250px minmax(0,1fr) 92px; column-gap:18px; padding:13px 0; border-top:1px dashed var(--line); align-items:baseline; }
+    .sender { font-weight:600; }
+    .subject { font-weight:600; }
+    .preview { margin-top:3px; font-size:17px; color:var(--muted); }
+    .mail-time { text-align:right; font-size:16px; color:var(--muted); white-space:nowrap; }
+    .window-footer { border-top:1px dashed var(--line); padding:12px 22px; color:var(--muted); font-size:16px; }
+    .flow { display:flex; flex-direction:column; align-items:center; gap:0; margin:20px 0 8px; text-align:center; font-size:20px; }
+    .flow .arrow { font-family:Arial,sans-serif; font-size:44px; line-height:1.15; }
+    .organized { padding:20px 22px 22px; }
+    .organized > .inbox-heading { padding:0 0 16px; }
+    .priority-strip { border:2px dashed #555; padding:16px; background:var(--wash); margin-bottom:24px; }
+    .priority-title { display:flex; align-items:baseline; flex-wrap:wrap; gap:12px; margin-bottom:12px; }
+    .priority-title h3 { font-size:25px; }
+    .priority-grid,.group-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+    .priority-card { display:flex; flex-direction:column; align-items:flex-start; gap:8px; padding:14px; border:1px dashed #666; background:#fff; }
+    .priority-card p { font-size:18px; }
+    .priority-link { text-decoration:none; }
+    .priority-link:hover { outline:2px dashed #222; outline-offset:3px; }
+    .card-person { font-size:19px; font-weight:650; line-height:1.35; }
+    .company { display:block; color:var(--muted); font-size:16px; font-weight:400; }
+    .priority-card .chip { margin-top:auto; }
+    .marker { font-size:14px; text-transform:uppercase; font-weight:700; letter-spacing:.04em; }
+    .chip { display:inline-block; border:1px dashed #555; padding:3px 10px; font-size:16px; background:#f5f5f5; font-weight:600; }
+    .group { border:1px dashed var(--line); padding:14px; }
+    .group-heading { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px; border-bottom:2px dashed #777; padding-bottom:12px; }
+    .group-heading h3 { font-size:26px; }
+    .count { font-size:16px; color:var(--muted); }
+    .thread-card { border:1px dashed var(--line); padding:14px; margin-top:14px; display:flex; flex-direction:column; align-items:flex-start; gap:9px; }
+    .thread-card p { font-size:18px; }
+    .thread-card .marker { margin-top:2px; }
+    .thread-open { display:block; text-decoration:none; }
+    .thread-open:hover { background:#f5f5f5; }
+    .open-label { display:block; margin-top:10px; text-decoration:underline; text-decoration-style:dashed; font-size:16px; }
+    .sort-note { margin:16px 0 0; font-size:16px; color:var(--muted); }
+    .detail-body { padding:22px; }
+    .thread-heading { border-bottom:1px dashed var(--line); padding-bottom:18px; margin-bottom:22px; }
+    .thread-heading h3 { font-size:28px; margin:7px 0; }
+    .detail-grid { display:grid; grid-template-columns:1.1fr 1fr; gap:28px; }
+    .section-label { font-size:22px; margin-bottom:16px; }
+    .timeline { list-style:none; margin:0 0 0 8px; padding:0 0 0 22px; border-left:2px dashed #888; }
+    .timeline li { position:relative; padding:0 0 22px 5px; }
+    .timeline li:last-child { padding-bottom:0; }
+    .timeline li::before { content:""; position:absolute; left:-29px; top:7px; width:10px; height:10px; border:2px solid #666; background:#fff; }
+    .exchange-meta { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:5px; }
+    .exchange-meta time { color:var(--muted); font-size:16px; }
+    .timeline p { font-size:18px; }
+    .promise { border:2px dashed #333; background:#eee; padding:16px; margin-bottom:18px; }
+    .promise h4 { margin:0 0 8px; font-size:16px; text-transform:uppercase; letter-spacing:.07em; }
+    .promise p { font-size:22px; font-weight:600; }
+    .promise .small-note { display:block; margin-top:9px; }
+    .suggestion { border:1px dashed #777; padding:16px; }
+    .suggestion h4 { font-size:20px; margin:0 0 7px; }
+    .reminder { border-top:1px dashed var(--line); margin-top:14px; padding-top:14px; }
+    .reminder strong { display:block; margin-bottom:5px; }
+    .action-area { border-top:1px dashed var(--line); margin-top:24px; padding-top:18px; }
+    .action-area > p { font-size:17px; color:var(--muted); margin-bottom:14px; }
+    .button-row { display:flex; gap:14px; }
+    button { border:2px dashed #444; border-radius:0; background:#fff; padding:12px 24px; min-height:56px; font-size:21px; font-weight:650; }
+    button:hover { background:#eee; }
+    button.primary { background:#ddd; }
+    button.primary:hover { background:#ccc; }
+    .button-row button { flex:1; }
+    .status { min-height:28px; margin-top:12px; font-size:17px; }
+    .editor { margin-top:16px; border:1px dashed #777; padding:16px; }
+    .editor label { display:block; margin-bottom:14px; font-size:17px; font-weight:600; }
+    .editor textarea,.editor input { display:block; width:100%; border:1px dashed #666; background:#fff; padding:10px; margin-top:6px; border-radius:0; }
+    .editor textarea { resize:vertical; min-height:104px; }
+    .editor-buttons { display:flex; flex-wrap:wrap; gap:12px; }
+    .editor button { font-size:18px; }
+    [hidden] { display:none !important; }
+    .page-footer { margin-top:28px; border-top:1px dashed var(--line); padding-top:14px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:15px; color:var(--muted); }
+    @media (min-width:1100px) { .button-row { max-width:700px; } }
+    @media (max-width:1000px) {
+      .page { padding:28px 24px; }
+      .mail-row { grid-template-columns:190px minmax(0,1fr) 80px; gap:12px; }
+      .priority-grid,.group-grid { gap:10px; }
+      .group,.thread-card,.priority-card { padding:11px; }
+      .detail-grid { grid-template-columns:1fr; gap:24px; }
+    }
+    @media (max-width:720px) {
+      body { font-size:18px; }
+      .page { padding:22px 16px; }
+      .header-top { align-items:flex-start; flex-direction:column; gap:9px; }
+      .scenario { font-size:20px; }
+      h2 { font-size:25px; }
+      .window-bar,.inbox-heading,.detail-body { padding:14px; }
+      .mail-list { padding:0 14px 8px; }
+      .mail-row { grid-template-columns:1fr auto; gap:2px 12px; padding:14px 0; }
+      .mail-content { grid-column:1 / -1; grid-row:2; }
+      .mail-time { grid-column:2; grid-row:1; }
+      .organized { padding:14px; }
+      .priority-grid,.group-grid { grid-template-columns:1fr; gap:16px; }
+      .priority-card,.thread-card,.group { padding:14px; }
+      .button-row { flex-direction:column; }
+    }
+    @media print {
+      html { scroll-behavior:auto; }
+      body { font-size:12pt; }
+      .page { max-width:none; padding:0; }
+      .page-header { margin-bottom:18px; }
+      .flow-nav { display:none; }
+      .screen { break-inside:avoid; }
+      .screen + .flow + .screen { break-before:page; }
+      .flow { margin:12px 0; }
+      .mail-row { grid-template-columns:170px minmax(0,1fr) 70px; padding:8px 0; }
+      .group-grid,.priority-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .detail-grid { grid-template-columns:1fr 1fr; gap:18px; }
+      .thread-card,.priority-card { padding:9px; }
+      .button-row { flex-direction:row; }
+      .editor { display:none; }
+      a { text-decoration:none; }
+    }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="page-header">
+    <div class="header-top"><span class="eyebrow">LuMaCo / Concept sketch 01</span><span class="prototype-label">Low-fidelity · Fictional example</span></div>
+    <h1>LuMaCo Prototype: Email Organizer</h1>
+    <p class="scenario">Monday 8:00 AM. Jordan opens their inbox after the weekend.</p>
+    <p class="context">Jordan · Manager, Example Company · A busy work inbox</p>
+    <p class="context">Illustrative scenario for discussion. All people, companies, messages, and counts are fictional.</p>
+    <nav class="flow-nav" aria-label="Prototype screen flow"><a href="#before">1. Before</a><span aria-hidden="true">→</span><a href="#after">2. After</a><span aria-hidden="true">→</span><a href="#detail">3. Thread detail</a></nav>
+  </header>
+
+  <section class="screen" id="before" aria-labelledby="before-title">
+    <div class="screen-title"><span class="step" aria-hidden="true">1</span><div><h2 id="before-title">Before / Everything in one pile</h2><p class="screen-description">What needs attention? Jordan has to read each thread to find out.</p></div></div>
+    <div class="window">
+      <div class="window-bar"><strong>Mail / Inbox</strong><span>Jordan · Example Company</span></div>
+      <div class="inbox-heading"><h3>Inbox: 214 unread.</h3><span class="small-note">9 sample threads shown · Latest first</span></div>
+      <ul class="mail-list" aria-label="Unsorted inbox sample">
+        <li class="mail-row"><div class="sender">Supplier contact · Supplier A</div><div class="mail-content"><div class="subject">Materials shipment delayed</div><p class="preview">The materials shipment due today will now arrive Wednesday.</p></div><time class="mail-time">7:56 AM</time></li>
+        <li class="mail-row"><div class="sender">Training teammate · Example Company</div><div class="mail-content"><div class="subject">Team training reminder</div><p class="preview">Team refresher training is scheduled for Thursday at 2 PM.</p></div><time class="mail-time">7:48 AM</time></li>
+        <li class="mail-row"><div class="sender">Customer contact · Customer A</div><div class="mail-content"><div class="subject">Has our delivery date slipped?</div><p class="preview">We expected your updated date Friday. Is Tuesday still on?</p></div><time class="mail-time">7:42 AM</time></li>
+        <li class="mail-row"><div class="sender">Billing contact · Supplier B</div><div class="mail-content"><div class="subject">Invoice 4821 does not match PO</div><p class="preview">Our invoice is $1,240 higher than your purchase order.</p></div><time class="mail-time">7:35 AM</time></li>
+        <li class="mail-row"><div class="sender">Purchasing contact · Customer B</div><div class="mail-content"><div class="subject">Quote revision needed</div><p class="preview">Please add the alternate service option before our 10 AM review.</p></div><time class="mail-time">7:30 AM</time></li>
+        <li class="mail-row"><div class="sender">Operations teammate · Example Company</div><div class="mail-content"><div class="subject">Operations update: Work delayed</div><p class="preview">Work is paused. The team expects a four-hour delay.</p></div><time class="mail-time">7:24 AM</time></li>
+        <li class="mail-row"><div class="sender">Order contact · Customer C</div><div class="mail-content"><div class="subject">Purchase order confirmed</div><p class="preview">PO 7718 is approved with the scope and pricing as quoted.</p></div><time class="mail-time">7:18 AM</time></li>
+        <li class="mail-row"><div class="sender">Shipping contact · Delivery Partner</div><div class="mail-content"><div class="subject">Today's pickup window</div><p class="preview">Can you confirm the order is ready for pickup between 1 and 3 PM?</p></div><time class="mail-time">7:12 AM</time></li>
+        <li class="mail-row"><div class="sender">Scheduling teammate · Example Company</div><div class="mail-content"><div class="subject">Tuesday team schedule</div><p class="preview">Please review the proposed team schedule by noon today.</p></div><time class="mail-time">7:05 AM</time></li>
+      </ul>
+      <div class="window-footer">Same visual weight for every email. Jordan sorts the messages manually.</div>
+    </div>
+  </section>
+
+  <div class="flow" aria-label="Flow: automatically sort the inbox"><span class="arrow" aria-hidden="true">↓</span><span>Automatically sort + surface what needs Jordan</span><span class="arrow" aria-hidden="true">↓</span></div>
+
+  <section class="screen" id="after" aria-labelledby="after-title">
+    <div class="screen-title"><span class="step" aria-hidden="true">2</span><div><h2 id="after-title">After / A sorted inbox, a clearer next step</h2><p class="screen-description">Same emails. Suggested priorities and actions, right inside the inbox.</p></div></div>
+    <div class="window">
+      <div class="window-bar"><strong>Mail / Inbox / Organizer view</strong><span>Jordan · Example Company</span></div>
+      <div class="organized">
+        <div class="inbox-heading"><h3>Inbox: 214 unread.</h3><span class="small-note">Sorted automatically · 9 sample threads shown</span></div>
+        <aside class="priority-strip" aria-labelledby="priority-title">
+          <div class="priority-title"><h3 id="priority-title">Needs you first</h3><span class="small-note">3 threads · Repeated below in their groups</span></div>
+          <div class="priority-grid">
+            <a class="priority-card priority-link" href="#detail"><span class="marker">! Overdue promise</span><span class="card-person">Customer contact<span class="company">Customer A · Operations manager</span></span><p>Waiting for the delivery update you promised Friday.</p><span class="chip">Reply today →</span></a>
+            <article class="priority-card"><span class="marker">! Due before 10 AM</span><div class="card-person">Purchasing contact<span class="company">Customer B</span></div><p>Needs a revised quote for this morning's review.</p><span class="chip">Reply today</span></article>
+            <article class="priority-card"><span class="marker">! Delivery at risk</span><div class="card-person">Supplier contact<span class="company">Supplier A</span></div><p>Materials due today is delayed until Wednesday.</p><span class="chip">Call</span></article>
+          </div>
+        </aside>
+        <div class="group-grid">
+          <section class="group" aria-labelledby="customers-title">
+            <div class="group-heading"><h3 id="customers-title">Customers</h3><span class="count">78 unread</span></div>
+            <a class="thread-open" href="#detail" aria-label="Open the customer's delivery date thread"><article class="thread-card"><div class="card-person">Customer contact<span class="company">Customer A · Operations manager</span></div><p>Waiting for the delivery update you promised Friday.</p><span class="marker">! Overdue promise</span><span class="chip">Reply today</span><span class="open-label">Open thread →</span></article></a>
+            <article class="thread-card"><div class="card-person">Purchasing contact<span class="company">Customer B</span></div><p>Needs a revised quote for this morning's review.</p><span class="marker">! Due before 10 AM</span><span class="chip">Reply today</span></article>
+            <article class="thread-card"><div class="card-person">Order contact<span class="company">Customer C</span></div><p>Confirmed PO 7718 at the agreed scope and price.</p><span class="marker">— Informational</span><span class="chip">No action needed</span></article>
+          </section>
+          <section class="group" aria-labelledby="internal-title">
+            <div class="group-heading"><h3 id="internal-title">Internal</h3><span class="count">51 unread</span></div>
+            <article class="thread-card"><div class="card-person">Operations teammate<span class="company">Example Company · Operations</span></div><p>Work is paused; the team expects a four-hour delay.</p><span class="marker">! Work delayed</span><span class="chip">Delegate</span></article>
+            <article class="thread-card"><div class="card-person">Scheduling teammate<span class="company">Example Company · Scheduling</span></div><p>Needs your review of Tuesday's team schedule.</p><span class="marker">! Due by noon</span><span class="chip">Reply today</span></article>
+            <article class="thread-card"><div class="card-person">Training teammate<span class="company">Example Company · Training</span></div><p>Team refresher training is Thursday at 2 PM.</p><span class="marker">— Upcoming notice</span><span class="chip">No action needed</span></article>
+          </section>
+          <section class="group" aria-labelledby="vendors-title">
+            <div class="group-heading"><h3 id="vendors-title">Vendors</h3><span class="count">85 unread</span></div>
+            <article class="thread-card"><div class="card-person">Supplier contact<span class="company">Supplier A</span></div><p>Materials due today is delayed until Wednesday.</p><span class="marker">! Delivery at risk</span><span class="chip">Call</span></article>
+            <article class="thread-card"><div class="card-person">Shipping contact<span class="company">Delivery Partner</span></div><p>Needs readiness confirmation for today's 1–3 PM pickup.</p><span class="marker">! Pickup today</span><span class="chip">Delegate</span></article>
+            <article class="thread-card"><div class="card-person">Billing contact<span class="company">Supplier B</span></div><p>Invoice 4821 is $1,240 above the purchase order.</p><span class="marker">— Review needed</span><span class="chip">Delegate</span></article>
+          </section>
+        </div>
+        <p class="sort-note">Counts cover all 214 unread emails; each group shows 3 sample threads. Priority cards are shortcuts to those same threads.</p>
+      </div>
+      <div class="window-footer">Organizer suggests the sort, next actions, and reminders. Jordan writes and sends every message.</div>
+    </div>
+  </section>
+
+  <div class="flow" aria-label="Flow: open the customer thread"><span class="arrow" aria-hidden="true">↓</span><span>Jordan opens the customer's delivery-date thread</span><span class="arrow" aria-hidden="true">↓</span></div>
+
+  <section class="screen" id="detail" aria-labelledby="detail-title">
+    <div class="screen-title"><span class="step" aria-hidden="true">3</span><div><h2 id="detail-title">Thread detail / Catch the open promise</h2><p class="screen-description">See the context, choose the next action, and keep the follow-up in view.</p></div></div>
+    <div class="window">
+      <div class="window-bar"><a href="#after">← Inbox / Customers</a><span>1 customer thread open</span></div>
+      <div class="detail-body">
+        <div class="thread-heading"><span class="marker">! Overdue customer commitment</span><h3>Has our delivery date slipped?</h3><p>Customer contact · Operations Manager, Customer A ↔ Jordan · Example Company</p></div>
+        <div class="detail-grid">
+          <section aria-labelledby="timeline-title">
+            <h3 class="section-label" id="timeline-title">Last 3 exchanges</h3>
+            <ol class="timeline">
+              <li><div class="exchange-meta"><strong>Customer → Jordan</strong><time>Thursday · 2:10 PM</time></div><p>“Can you confirm that our order will still arrive Tuesday? We need to plan the team schedule.”</p></li>
+              <li><div class="exchange-meta"><strong>Jordan → Customer</strong><time>Thursday · 3:05 PM</time></div><p>“I'm checking with operations. I will send you an updated delivery date by Friday.”</p></li>
+              <li><div class="exchange-meta"><strong>Customer → Jordan</strong><time>Monday · 7:42 AM</time></div><p>“We expected your updated date Friday. Has the delivery slipped, or is Tuesday still on?”</p></li>
+            </ol>
+          </section>
+          <div>
+            <aside class="promise" aria-label="Highlighted open promise"><h4>Open promise / Overdue</h4><p>You said you would send an updated delivery date by Friday</p><span class="small-note">From your Thursday reply · No delivery update appears in this thread.</span></aside>
+            <section class="suggestion" aria-labelledby="suggestion-title"><h4 id="suggestion-title">Suggested next action</h4><p id="action-copy">Check the delivery date with operations, then write the customer an update today.</p><div class="reminder"><strong>Follow-up reminder</strong><p id="reminder-copy">Today at 11:00 AM — remind me if I have not replied to the customer.</p></div></section>
+          </div>
+        </div>
+        <div class="action-area">
+          <p>Confirm keeps this action and reminder. Edit changes them. Dismiss removes the suggestion.</p>
+          <div class="button-row"><button class="primary" id="confirm" type="button">Confirm</button><button id="edit" type="button" aria-expanded="false" aria-controls="suggestion-editor">Edit</button><button id="dismiss" type="button">Dismiss</button></div>
+          <form class="editor" id="suggestion-editor" hidden>
+            <label for="action-input">Your next action<textarea id="action-input" required>Check the delivery date with operations, then write the customer an update today.</textarea></label>
+            <label for="reminder-input">Your follow-up reminder<input id="reminder-input" type="text" required value="Today at 11:00 AM — remind me if I have not replied to the customer."></label>
+            <div class="editor-buttons"><button class="primary" type="submit">Save changes</button><button id="cancel-edit" type="button">Cancel</button></div>
+          </form>
+          <p class="status" id="suggestion-status" role="status" aria-live="polite">Suggestion awaiting Jordan's review.</p>
+          <p class="small-note">Prototype controls update this page only. Jordan writes and sends the reply.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="page-footer"><span>LuMaCo / Email Organizer / Discussion prototype</span><span>Illustrative scenario · People, companies, messages, and counts are fictional · Changes reset on reload</span></footer>
+</main>
+<script>
+  (() => {
+    const byId = id => document.getElementById(id);
+    const editor = byId('suggestion-editor');
+    const editButton = byId('edit');
+    const status = byId('suggestion-status');
+    let dismissed = false;
+    const setEditor = open => {
+      editor.hidden = !open;
+      editButton.setAttribute('aria-expanded', String(open));
+    };
+    byId('confirm').addEventListener('click', () => {
+      setEditor(false);
+      if (dismissed) {
+        status.textContent = 'No suggestion to confirm. Select Edit to add your next action and reminder.';
+        return;
+      }
+      status.textContent = 'Confirmed for this prototype: next action and follow-up reminder kept. No message sent.';
+    });
+    editButton.addEventListener('click', () => {
+      byId('action-input').value = byId('action-copy').textContent;
+      byId('reminder-input').value = byId('reminder-copy').textContent;
+      setEditor(true);
+      byId('action-input').focus();
+    });
+    byId('dismiss').addEventListener('click', () => {
+      setEditor(false);
+      dismissed = true;
+      byId('suggestion-title').textContent = 'Suggestion dismissed';
+      byId('action-copy').textContent = 'No suggested action kept. Use Edit to add your own.';
+      byId('reminder-copy').textContent = 'No reminder kept.';
+      status.textContent = 'Dismissed for this prototype. The customer thread and open promise remain visible.';
+    });
+    byId('cancel-edit').addEventListener('click', () => { setEditor(false); editButton.focus(); });
+    editor.addEventListener('submit', event => {
+      event.preventDefault();
+      const action = byId('action-input').value.trim();
+      const reminder = byId('reminder-input').value.trim();
+      if (!action || !reminder) {
+        status.textContent = 'Please enter an action and a reminder before saving.';
+        return;
+      }
+      byId('suggestion-title').textContent = 'Your next action';
+      dismissed = false;
+      byId('action-copy').textContent = action;
+      byId('reminder-copy').textContent = reminder;
+      setEditor(false);
+      status.textContent = 'Changes saved for this prototype. Select Confirm to keep the action and reminder.';
+      editButton.focus();
+    });
+  })();
+</script>
+</body>
+</html>

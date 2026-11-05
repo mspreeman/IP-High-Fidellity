@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="A rough, fictional contact-list sketch. Find people, check a possible match, and add them with taps instead of typing.">
+  <title>LuMaCo Prototype: Contact Harvester</title>
+  <style>
+    :root { --ink:#222; --muted:#595959; --line:#888; --wash:#f3f3f3; --sketch:"Segoe Print","Bradley Hand","Comic Sans MS","Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    html { color-scheme:light; }
+    body { margin:0; background:#fff; color:var(--ink); font:19px/1.5 "Segoe UI",Arial,sans-serif; }
+    h1,h2,h3,p { margin:0; }
+    h1,h2,h3,.screen-number { font-family:var(--sketch); }
+    button,input { font:inherit; color:inherit; }
+    button { cursor:pointer; min-height:52px; border:2px dashed #555; border-radius:0; padding:10px 14px; background:#fff; font-size:19px; font-weight:650; }
+    button:hover { background:#eee; }
+    button:disabled { cursor:default; color:#666; background:#eee; }
+    button:focus-visible,input:focus-visible,[tabindex]:focus-visible { outline:3px solid #222; outline-offset:4px; }
+    button.primary { background:#ddd; }
+    button.primary:hover:not(:disabled) { background:#ccc; }
+    [hidden] { display:none !important; }
+    .page { max-width:1800px; margin:auto; padding:30px 28px 40px; }
+    .page-header { border-bottom:2px dashed #333; padding-bottom:22px; margin-bottom:24px; }
+    .header-top { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:10px; }
+    .eyebrow { font-size:15px; text-transform:uppercase; letter-spacing:.1em; font-weight:700; }
+    .badge { display:inline-block; border:1px dashed #888; background:#fff; padding:4px 9px; font-size:15px; }
+    h1 { font-size:clamp(30px,3vw,42px); line-height:1.3; }
+    .intro { margin-top:12px; font-size:21px; }
+    .small-note { font-size:16px; color:var(--muted); }
+    .page-header .small-note { margin-top:8px; }
+    .scroll-hint { display:none; margin-bottom:14px; font-size:17px; color:var(--muted); }
+    .board-wrap { overflow-x:auto; padding:5px 5px 14px; margin:0 -5px; }
+    .board { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; min-width:1140px; align-items:start; }
+    .screen { border:2px dashed #444; min-width:0; background:#fff; }
+    .screen-heading { border-bottom:2px dashed #777; padding:17px 18px; background:#f3f3f3; }
+    .screen-number { font-size:16px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px; }
+    h2 { font-size:27px; line-height:1.35; }
+    .screen-body { padding:18px; }
+    .lead { font-size:19px; line-height:1.5; }
+    .zero-counter { border:2px dashed #555; background:#eee; padding:11px 14px; margin:16px 0; font-size:22px; font-weight:700; }
+    .list-heading { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+    .list-heading strong { font-size:18px; }
+    .people-list { list-style:none; padding:0; margin:0; max-height:548px; overflow-y:auto; border:1px dashed #888; }
+    .people-list li + li { border-top:1px dashed #999; }
+    .person-row { display:flex; align-items:flex-start; gap:11px; padding:14px 12px; cursor:pointer; }
+    input[type=checkbox],input[type=radio] { accent-color:#333; width:22px; height:22px; margin:3px 0 0; flex:0 0 22px; }
+    .person-name { display:block; font-size:20px; font-weight:650; }
+    .company { display:block; color:var(--muted); font-size:17px; }
+    .how-found { display:block; font-size:16px; margin-top:5px; line-height:1.45; }
+    .selection-footer { border:2px dashed #666; padding:14px; margin-top:16px; background:#f5f5f5; }
+    .selection-total { font-size:23px; font-weight:700; margin-bottom:12px; }
+    .selection-total::before { content:"✓ "; }
+    .wide-button { width:100%; }
+    .status { font-size:16px; margin-top:12px; min-height:24px; color:var(--muted); }
+    .screen-footer { padding:12px 18px; border-top:1px dashed #888; font-size:16px; color:var(--muted); }
+    .match-card { border:1px dashed #888; padding:12px 14px; margin-bottom:12px; }
+    .match-card .small-note { display:block; margin-bottom:5px; }
+    .match-card strong { display:block; font-size:21px; }
+    .email { font-size:17px; overflow-wrap:anywhere; }
+    .merge-arrow { text-align:center; font-size:27px; line-height:1; padding:0 0 12px; }
+    h3 { font-size:23px; line-height:1.4; }
+    .contact-card { border:2px dashed #666; padding:14px; }
+    .contact-card h3 { padding-bottom:12px; margin-bottom:12px; border-bottom:1px dashed #999; }
+    .contact-fields { padding:0; margin:0; }
+    .contact-fields > div { margin-bottom:11px; }
+    .contact-fields dt { color:var(--muted); font-size:16px; margin-bottom:2px; }
+    .contact-fields dd { margin:0; font-size:19px; overflow-wrap:anywhere; }
+    .contact-fields .uncertain { background:#eee; border:2px dashed #555; padding:10px 12px; margin-top:14px; }
+    .uncertain .check-label { display:block; margin-top:6px; font-size:16px; font-weight:650; }
+    fieldset { min-width:0; margin:16px 0; padding:0; border:0; }
+    legend { font-size:17px; color:var(--muted); margin-bottom:10px; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .chip { cursor:pointer; border:1px dashed #777; padding:7px 10px; min-height:44px; display:flex; align-items:center; gap:7px; font-size:17px; }
+    .chip input { width:17px; height:17px; flex:0 0 17px; margin:0; }
+    .chip:has(input:checked) { background:#ddd; border:2px dashed #333; padding:6px 9px; }
+    .merge-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .merge-actions .merge-primary { grid-column:1 / -1; min-height:68px; font-size:23px; }
+    .fix-panel { margin-top:16px; border:2px dashed #777; background:#f5f5f5; padding:14px; }
+    .fix-panel h3 { font-size:21px; margin-bottom:9px; }
+    .fix-options { display:grid; grid-template-columns:1fr; gap:9px; }
+    .fix-options button { min-height:46px; font-size:17px; text-align:left; }
+    .fix-panel .small-note { margin-bottom:12px; }
+    .count-heading { font-size:28px; font-weight:650; line-height:1.35; }
+    .count-subtitle { margin-top:6px; font-size:20px; }
+    .saved-contacts { list-style:none; padding:0; margin:18px 0; border:1px dashed #888; }
+    .saved-contacts li { padding:13px; }
+    .saved-contacts li + li { border-top:1px dashed #999; }
+    .waiting { border:2px dashed #666; padding:16px; background:#f3f3f3; margin:20px 0; }
+    .waiting p { font-size:22px; font-weight:600; margin-bottom:12px; }
+    .waiting button { width:100%; }
+    .waiting-people { list-style:none; margin:14px 0 0; padding:0; background:#fff; }
+    .waiting-people li { border:1px dashed #999; }
+    .waiting-people li + li { border-top:0; }
+    .waiting-people .person-row { padding:12px 10px; }
+    .waiting-actions { margin-top:12px; display:grid; gap:9px; }
+    .settings { border:1px dashed #888; padding:16px; margin-bottom:20px; }
+    .toggle-label { display:flex; align-items:flex-start; gap:12px; cursor:pointer; font-size:20px; font-weight:600; }
+    .toggle-label input { position:absolute; opacity:0; width:1px; height:1px; }
+    .switch { width:52px; height:30px; flex:0 0 52px; background:#eee; border:2px dashed #666; padding:3px; display:flex; align-items:center; margin-top:2px; }
+    .switch::before { content:""; display:block; width:18px; height:18px; background:#555; }
+    .toggle-label input:checked + .switch { background:#ccc; justify-content:flex-end; }
+    .toggle-label input:focus-visible + .switch { outline:3px solid #222; outline-offset:4px; }
+    .settings p { font-size:17px; margin-top:12px; }
+    .monthly-total { border-top:1px dashed #888; padding-top:16px; margin-top:20px; font-size:17px; }
+    .feedback { margin-top:28px; border:2px dashed #777; padding:22px; }
+    .feedback h2 { font-size:28px; margin-bottom:16px; }
+    .questions { padding-left:28px; margin:0; }
+    .questions li { font-size:21px; padding-left:5px; margin-bottom:12px; }
+    .questions li:last-child { margin-bottom:0; }
+    .page-footer { margin-top:22px; border-top:1px dashed #888; padding-top:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:15px; color:var(--muted); }
+    .reset { min-height:44px; font-size:16px; padding:7px 14px; }
+    @media (max-width:1250px) { .scroll-hint { display:block; } .page { padding:24px 18px; } .board { gap:16px; } }
+    @media (max-width:600px) { .page { padding:20px 14px; } .intro { font-size:19px; } .feedback { padding:18px; } .questions li { font-size:19px; } }
+    @media print {
+      @page { size:landscape; margin:10mm; }
+      .page { max-width:none; padding:0; }
+      .board-wrap { overflow:visible; }
+      .board { min-width:0; gap:10px; align-items:start; }
+      .screen-body,.screen-heading { padding:12px; }
+      .screen { break-inside:avoid; }
+      h2 { font-size:21px; }
+      .people-list { max-height:530px; overflow:hidden; }
+      .scroll-hint,.reset,.fix-panel { display:none; }
+      .feedback { break-inside:avoid; }
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="page-header">
+    <div class="header-top"><span class="eyebrow">LuMaCo / Concept sketch 05</span><span class="badge">Rough sketch · Made-up people and details</span></div>
+    <h1>LuMaCo Prototype: Contact Harvester</h1>
+    <p class="intro">Your contact list, built from people you already talk to. You tap, confirm, or skip.</p>
+    <p class="small-note">Three example steps, shown side by side. Try each one on its own. Nothing is added to a real contact list or sent from this page.</p>
+  </header>
+  <p class="scroll-hint">The three screens stay side by side. Scroll sideways to see the next screen on a smaller window.</p>
+
+  <div class="board-wrap" tabindex="0" role="region" aria-label="Three prototype screens, side by side">
+    <div class="board">
+      <section class="screen" id="found" aria-labelledby="found-title">
+        <header class="screen-heading"><p class="screen-number">Screen 1</p><h2 id="found-title">People found for you</h2></header>
+        <div class="screen-body">
+          <p class="lead">We looked through your email, calendar, and recent calls. Found 23 people you talk to who are not in your contacts yet.</p>
+          <p class="zero-counter">Fields you typed: 0.</p>
+          <div class="list-heading"><strong>23 people found</strong><span class="small-note">Scroll this list to see everyone</span></div>
+          <ul class="people-list" aria-label="23 people found" tabindex="0">
+            <li><label class="person-row"><input id="found-01" type="checkbox" checked><span><span class="person-name">Alex Morgan</span><span class="company">Customer A</span><span class="how-found">Emailed you 6 times about the rooftop unit quote, last on Oct 14.</span></span></label></li>
+            <li><label class="person-row"><input id="found-02" type="checkbox" checked><span><span class="person-name">Taylor Bennett</span><span class="company">Customer B</span><span class="how-found">On 4 calendar invites with you this month.</span></span></label></li>
+            <li><label class="person-row"><input id="found-03" type="checkbox" checked><span><span class="person-name">Riley Chen</span><span class="company">Supplier A</span><span class="how-found">Called you twice about delivery dates, last on Oct 16.</span></span></label></li>
+            <li><label class="person-row"><input id="found-04" type="checkbox" checked><span><span class="person-name">Jamie Brooks</span><span class="company">Customer C</span><span class="how-found">Emailed you about a revised order on Oct 15.</span></span></label></li>
+            <li><label class="person-row"><input id="found-05" type="checkbox" checked><span><span class="person-name">Sam Rivera</span><span class="company">Customer D</span><span class="how-found">On 3 project calls with you this month.</span></span></label></li>
+            <li><label class="person-row"><input id="found-06" type="checkbox" checked><span><span class="person-name">Jordan Patel</span><span class="company">Partner A</span><span class="how-found">Joined your project check-in on Oct 13.</span></span></label></li>
+            <li><label class="person-row"><input id="found-07" type="checkbox" checked><span><span class="person-name">Casey Ellis</span><span class="company">Customer E</span><span class="how-found">Emailed you 4 times about a quote this month.</span></span></label></li>
+            <li><label class="person-row"><input id="found-08" type="checkbox" checked><span><span class="person-name">Drew Parker</span><span class="company">Supplier B</span><span class="how-found">Called you about an order on Oct 12.</span></span></label></li>
+            <li><label class="person-row"><input id="found-09" type="checkbox" checked><span><span class="person-name">Morgan Shaw</span><span class="company">Customer F</span><span class="how-found">On 2 calendar invites for the same project.</span></span></label></li>
+            <li><label class="person-row"><input id="found-10" type="checkbox" checked><span><span class="person-name">Avery Cole</span><span class="company">Customer G</span><span class="how-found">Emailed you drawings to review on Oct 17.</span></span></label></li>
+            <li><label class="person-row"><input id="found-11" type="checkbox" checked><span><span class="person-name">Lee Torres</span><span class="company">Partner B</span><span class="how-found">On your planning meeting invite from Oct 10.</span></span></label></li>
+            <li><label class="person-row"><input id="found-12" type="checkbox" checked><span><span class="person-name">Cameron Reed</span><span class="company">Customer H</span><span class="how-found">Called you 3 times about the next order.</span></span></label></li>
+            <li><label class="person-row"><input id="found-13" type="checkbox" checked><span><span class="person-name">Quinn Lewis</span><span class="company">Customer I</span><span class="how-found">Emailed you about a site visit on Oct 18.</span></span></label></li>
+            <li><label class="person-row"><input id="found-14" type="checkbox" checked><span><span class="person-name">Dana Kim</span><span class="company">Supplier C</span><span class="how-found">On your delivery check-in invite this week.</span></span></label></li>
+            <li><label class="person-row"><input id="found-15" type="checkbox" checked><span><span class="person-name">Robin Bell</span><span class="company">Customer J</span><span class="how-found">Emailed you 5 times about service options.</span></span></label></li>
+            <li><label class="person-row"><input id="found-16" type="checkbox" checked><span><span class="person-name">Skyler Hayes</span><span class="company">Partner C</span><span class="how-found">Called you after the project meeting on Oct 19.</span></span></label></li>
+            <li><label class="person-row"><input id="found-17" type="checkbox" checked><span><span class="person-name">Reese Allen</span><span class="company">Customer K</span><span class="how-found">On 3 calendar invites with you this month.</span></span></label></li>
+            <li><label class="person-row"><input id="found-18" type="checkbox" checked><span><span class="person-name">Devon Cruz</span><span class="company">Customer L</span><span class="how-found">Emailed you a purchase order on Oct 20.</span></span></label></li>
+            <li><label class="person-row"><input id="found-19" type="checkbox" checked><span><span class="person-name">Peyton Ross</span><span class="company">Supplier D</span><span class="how-found">Called you about available parts on Oct 21.</span></span></label></li>
+            <li><label class="person-row"><input id="found-20" type="checkbox"><span><span class="person-name">Harper Lane</span><span class="company">Customer M</span><span class="how-found">On one meeting invite with you this month.</span></span></label></li>
+            <li><label class="person-row"><input id="found-21" type="checkbox"><span><span class="person-name">Elliot Ford</span><span class="company">Partner D</span><span class="how-found">Copied on an email about a quote on Oct 11.</span></span></label></li>
+            <li><label class="person-row"><input id="found-22" type="checkbox"><span><span class="person-name">Finley Gray</span><span class="company">Customer N</span><span class="how-found">Joined one calendar invite on Oct 9.</span></span></label></li>
+            <li><label class="person-row"><input id="found-23" type="checkbox"><span><span class="person-name">Blair Scott</span><span class="company">Supplier E</span><span class="how-found">Emailed you once about a part on Oct 8.</span></span></label></li>
+          </ul>
+          <div class="selection-footer"><p class="selection-total" id="selection-total">19 of 23 selected</p><button class="primary wide-button" id="add-selected" type="button">Add selected people.</button></div>
+          <p class="status" id="found-status" role="status" aria-live="polite">Leave out anyone you do not want to add.</p>
+        </div>
+        <footer class="screen-footer">Pick the people. Their details are already filled in.</footer>
+      </section>
+
+      <section class="screen" id="match" aria-labelledby="match-title">
+        <header class="screen-heading"><p class="screen-number">Screen 2</p><h2 id="match-title">Is this the same person?</h2></header>
+        <div class="screen-body">
+          <p class="lead" style="margin-bottom:14px">These two names may be the same engineer.</p>
+          <div class="match-card"><span class="small-note">Found in email</span><strong>Alex Morgan</strong><span class="email">alex.morgan@customer-a.example</span></div>
+          <div class="match-card"><span class="small-note">Found on a calendar invite</span><strong>Alex M.</strong><span>Customer A</span></div>
+          <div class="merge-arrow" aria-hidden="true">↓</div>
+          <article class="contact-card"><h3>One contact, already filled in</h3><dl class="contact-fields"><div><dt>Name</dt><dd id="contact-name">Alex Morgan</dd></div><div><dt>Company</dt><dd>Customer A</dd></div><div><dt>Email</dt><dd class="email">alex.morgan@customer-a.example</dd></div><div><dt>Phone</dt><dd id="contact-phone">(202) 555-0148</dd></div><div><dt>How you know him</dt><dd>Rooftop unit quote: 6 emails and 4 calendar invites this month.</dd></div><div class="uncertain"><dt>Job title</dt><dd id="contact-title">Senior Project Engineer</dd><span class="check-label" id="title-check">Not sure about this one.</span><p class="small-note">Guessed from his email sign-off.</p></div></dl></article>
+          <fieldset id="relationship-options"><legend>How do you know him? Tap one.</legend><div class="chips"><label class="chip"><input type="radio" name="relationship" value="Customer">Customer</label><label class="chip"><input type="radio" name="relationship" value="Engineer" checked>Engineer</label><label class="chip"><input type="radio" name="relationship" value="Vendor">Vendor</label><label class="chip"><input type="radio" name="relationship" value="Coworker">Coworker</label></div></fieldset>
+          <div class="merge-actions"><button class="primary merge-primary" id="merge" type="button">Yes, merge them</button><button id="keep-both" type="button">No, keep both</button><button id="fix" type="button" aria-expanded="false" aria-controls="fix-panel">Fix something.</button></div>
+          <div class="fix-panel" id="fix-panel" hidden><h3>Tap what you want to change</h3><p class="small-note">Use a detail already found, leave it out, or skip for now.</p><div class="fix-options"><button id="name-email" type="button">Use the email name: Alex Morgan</button><button id="name-calendar" type="button">Use the calendar name: Alex M.</button><button id="title-engineer" type="button">Use the title: Engineer</button><button id="title-none" type="button">Leave the job title out</button><button id="phone-none" type="button">Leave the phone number out</button><button id="skip-match" type="button">Skip this person for now</button><button id="close-fix" type="button">Done fixing</button></div></div>
+          <p class="status" id="match-status" role="status" aria-live="polite">Check the name and title. No typing needed.</p>
+        </div>
+        <footer class="screen-footer">Your choice decides whether these become one contact or two.</footer>
+      </section>
+
+      <section class="screen" id="contacts" aria-labelledby="contacts-title">
+        <header class="screen-heading"><p class="screen-number">Screen 3</p><h2 id="contacts-title">Your contacts, kept up to date</h2></header>
+        <div class="screen-body">
+          <p class="count-heading" id="contact-count">64 people.</p><p class="count-subtitle">Updated this morning on its own.</p>
+          <ul class="saved-contacts" aria-label="A few people already in your contacts"><li><span class="person-name">Alex Morgan</span><span class="company">Customer A · Engineer</span></li><li><span class="person-name">Taylor Bennett</span><span class="company">Customer B · Customer</span></li><li><span class="person-name">Riley Chen</span><span class="company">Supplier A · Vendor</span></li></ul>
+          <p class="small-note" id="shown-count">A few of your 64 people</p>
+          <div class="waiting"><p id="waiting-count">3 new people waiting for your OK</p><button id="review" type="button" aria-expanded="false" aria-controls="waiting-review">Review</button><div id="waiting-review" hidden><ul class="waiting-people"><li id="pending-row-1"><label class="person-row"><input type="checkbox" id="pending-1"><span><span class="person-name">Sam Rivera</span><span class="company">Customer D</span><span class="how-found">Found in your recent calls.</span></span></label></li><li id="pending-row-2"><label class="person-row"><input type="checkbox" id="pending-2"><span><span class="person-name">Jordan Patel</span><span class="company">Partner A</span><span class="how-found">Found on your calendar.</span></span></label></li><li id="pending-row-3"><label class="person-row"><input type="checkbox" id="pending-3"><span><span class="person-name">Jamie Brooks</span><span class="company">Customer C</span><span class="how-found">Found in your email.</span></span></label></li></ul><div class="waiting-actions"><button id="add-waiting" type="button" disabled>Add selected people</button><button id="later" type="button">Not now</button></div></div></div>
+          <div class="settings"><label class="toggle-label"><input id="ask-first" type="checkbox" role="switch" checked aria-describedby="approval-help"><span class="switch" aria-hidden="true"></span><span>Ask me before adding anyone.</span></label><p id="approval-help">Nothing gets added without your OK.</p></div>
+          <button class="wide-button" id="send" type="button">Send contacts to my address book.</button>
+          <p class="status" id="contacts-status" role="status" aria-live="polite">Your contacts are ready when you need them.</p>
+          <p class="monthly-total" id="monthly-total">Added 11 people this month. You typed 0 fields.</p>
+        </div>
+        <footer class="screen-footer">New details can be found in the background. You choose who gets added.</footer>
+      </section>
+    </div>
+  </div>
+
+  <section class="feedback" id="questions" aria-labelledby="questions-title"><h2 id="questions-title">Questions for Jonathan</h2><ol class="questions"><li>Would this replace typing contacts into Salesforce or your address book?</li><li>Which should it pull from first: email, calendar, or calls?</li><li>What breaks if it merges two people who are not the same person?</li><li>Should new people be added automatically, or should you approve each one first?</li><li>What is missing that would make this useless to you?</li><li>What would make you stop using this after a week?</li></ol></section>
+  <footer class="page-footer"><span>LuMaCo / Contact Harvester / Made-up examples</span><button class="reset" id="reset" type="button">Reset examples</button><span>Everything resets when you reload the page.</span></footer>
+</main>
+<script>
+  (() => {
+    const el = id => document.getElementById(id);
+    const found = Array.from({length:23},(_,i) => el('found-'+String(i+1).padStart(2,'0')));
+    const relationships = Array.from(document.querySelectorAll('input[name="relationship"]'));
+    let foundAdded = false;
+    let matchDone = false;
+    let people = 64;
+    let monthly = 11;
+    const pendingAdded = new Set();
+    const selectedCount = () => found.filter(input => input.checked).length;
+    const updateFound = () => {
+      const count = selectedCount();
+      el('selection-total').textContent = count+' of 23 selected';
+      el('add-selected').disabled = count === 0 || foundAdded;
+    };
+    found.forEach(input => input.addEventListener('change',updateFound));
+    el('add-selected').addEventListener('click',() => {
+      if (foundAdded || selectedCount() === 0) return;
+      foundAdded = true;
+      const count = selectedCount();
+      found.forEach(input => { input.disabled = true; });
+      el('add-selected').disabled = true;
+      el('selection-total').textContent = count+' of 23 added';
+      el('found-status').textContent = count+' people added in this example. You typed 0 fields. The next screen is a separate example.';
+    });
+    const setFix = open => {
+      el('fix-panel').hidden = !open;
+      el('fix').setAttribute('aria-expanded',String(open));
+    };
+    const finishMatch = message => {
+      matchDone = true;
+      setFix(false);
+      ['merge','keep-both','fix'].forEach(id => { el(id).disabled = true; });
+      relationships.forEach(input => { input.disabled = true; });
+      el('match-status').textContent = message;
+    };
+    el('merge').addEventListener('click',() => {
+      if (matchDone) return;
+      const relationship = relationships.find(input => input.checked).value;
+      el('title-check').textContent = 'Reviewed by you.';
+      finishMatch('Added one contact: '+el('contact-name').textContent+'. Saved as '+relationship+' in this example. You typed 0 fields.');
+    });
+    el('keep-both').addEventListener('click',() => {
+      if (matchDone) return;
+      finishMatch('Kept both people separate in this example. You typed 0 fields.');
+    });
+    el('fix').addEventListener('click',() => { if (!matchDone) setFix(el('fix-panel').hidden); });
+    const fixValue = (button,field,value,message) => el(button).addEventListener('click',() => {
+      if (matchDone) return;
+      el(field).textContent = value;
+      el('match-status').textContent = message+' Nothing added yet.';
+    });
+    fixValue('name-email','contact-name','Alex Morgan','Using the full name found in email.');
+    fixValue('name-calendar','contact-name','Alex M.','Using the name found on the calendar invite.');
+    fixValue('title-engineer','contact-title','Engineer','You chose Engineer.');
+    fixValue('title-none','contact-title','Left out','Job title left out.');
+    fixValue('phone-none','contact-phone','Left out','Phone number left out.');
+    ['title-engineer','title-none'].forEach(id => el(id).addEventListener('click',() => {
+      if (!matchDone) el('title-check').textContent = 'Chosen by you.';
+    }));
+    el('close-fix').addEventListener('click',() => { setFix(false); el('fix').focus(); });
+    el('skip-match').addEventListener('click',() => {
+      if (!matchDone) finishMatch('Skipped for now. Neither entry was added in this example.');
+    });
+    const pending = [1,2,3].map(i => el('pending-'+i));
+    const updatePending = () => {
+      const remaining = 3-pendingAdded.size;
+      el('waiting-count').textContent = remaining === 0 ? 'No new people waiting for your OK' : remaining+' new '+(remaining === 1 ? 'person' : 'people')+' waiting for your OK';
+      el('add-waiting').disabled = !pending.some((input,i) => input.checked && !pendingAdded.has(i));
+      el('review').disabled = remaining === 0;
+    };
+    const setReview = open => {
+      el('waiting-review').hidden = !open;
+      el('review').setAttribute('aria-expanded',String(open));
+      el('review').textContent = open ? 'Close review' : 'Review';
+    };
+    el('review').addEventListener('click',() => setReview(el('waiting-review').hidden));
+    el('later').addEventListener('click',() => {
+      setReview(false);
+      el('contacts-status').textContent = 'Left for later. No one was added.';
+    });
+    pending.forEach(input => input.addEventListener('change',updatePending));
+    el('add-waiting').addEventListener('click',() => {
+      let added = 0;
+      pending.forEach((input,i) => {
+        if (input.checked && !pendingAdded.has(i)) {
+          pendingAdded.add(i);
+          input.disabled = true;
+          el('pending-row-'+(i+1)).hidden = true;
+          added++;
+        }
+      });
+      if (added === 0) return;
+      people += added;
+      monthly += added;
+      el('contact-count').textContent = people+' people.';
+      el('shown-count').textContent = 'A few of your '+people+' people';
+      el('monthly-total').textContent = 'Added '+monthly+' people this month. You typed 0 fields.';
+      el('contacts-status').textContent = 'Added '+added+' '+(added === 1 ? 'person' : 'people')+' with your OK in this example. You typed 0 fields.';
+      updatePending();
+      if (pendingAdded.size === 3) setReview(false);
+    });
+    el('ask-first').addEventListener('change',() => {
+      el('approval-help').textContent = el('ask-first').checked ? 'Nothing gets added without your OK.' : 'New people can be added without asking. The people already waiting still need your OK.';
+    });
+    el('send').addEventListener('click',() => {
+      el('contacts-status').textContent = people+' people would go to your address book. Nothing is sent from this sketch.';
+    });
+    el('reset').addEventListener('click',() => window.location.reload());
+  })();
+</script>
+</body>
+</html>

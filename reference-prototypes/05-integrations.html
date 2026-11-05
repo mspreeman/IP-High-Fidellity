@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="A fictional wireframe bringing project context from existing tools into one sourced view, with actions reviewed before filing.">
+  <title>LuMaCo Prototype: Current Integrations</title>
+  <style>
+    :root { --ink:#222; --muted:#595959; --line:#888; --wash:#f3f3f3; --sketch:"Segoe Print","Bradley Hand","Comic Sans MS","Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; scroll-padding-top:24px; }
+    body { margin:0; background:#fff; color:var(--ink); font:19px/1.5 "Segoe UI",Arial,sans-serif; }
+    h1,h2,h3,p { margin:0; }
+    h1,h2,h3,.step,.flow { font-family:var(--sketch); }
+    a { color:inherit; text-underline-offset:4px; }
+    button,input,textarea { font:inherit; color:inherit; }
+    a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible { outline:3px solid #222; outline-offset:4px; }
+    button { cursor:pointer; border:2px dashed #444; border-radius:0; background:#fff; padding:11px 20px; min-height:54px; font-size:20px; font-weight:650; }
+    button:hover { background:#eee; }
+    button:disabled { cursor:default; color:#666; background:#eee; }
+    button.primary { background:#ddd; }
+    button.primary:hover:not(:disabled) { background:#ccc; }
+    [hidden] { display:none !important; }
+    .page { max-width:1400px; margin:auto; padding:38px 42px 48px; }
+    .page-header { border-bottom:2px dashed var(--ink); padding-bottom:26px; }
+    .header-top { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px; }
+    .eyebrow { font-size:15px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; }
+    .badge { display:inline-block; border:1px dashed #777; padding:4px 10px; font-size:15px; background:#fff; }
+    h1 { font-size:clamp(30px,3.2vw,43px); line-height:1.3; }
+    h2 { font-size:29px; line-height:1.4; }
+    h3 { font-size:25px; }
+    .scenario { margin-top:14px; font-size:22px; }
+    .context { color:var(--muted); margin-top:8px; font-size:17px; }
+    .flow-nav { display:flex; flex-wrap:wrap; align-items:center; gap:14px; padding-top:20px; font-size:18px; }
+    .flow-nav a { text-decoration-style:dashed; }
+    .screen { margin-top:28px; scroll-margin-top:24px; }
+    .screen-title { display:flex; align-items:flex-start; gap:15px; margin-bottom:16px; }
+    .step { width:44px; height:44px; flex:0 0 44px; display:grid; place-items:center; border:2px dashed var(--ink); font-size:25px; font-weight:700; }
+    .screen-description { font-size:18px; color:var(--muted); margin-top:2px; }
+    .window { border:2px dashed var(--ink); }
+    .window-bar { border-bottom:1px dashed var(--line); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; background:var(--wash); font-size:16px; }
+    .window-bar strong { font-size:18px; }
+    .window-body { padding:24px; }
+    .window-footer { border-top:1px dashed var(--line); padding:12px 22px; font-size:16px; color:var(--muted); }
+    .small-note { font-size:16px; color:var(--muted); }
+    .flow { display:flex; flex-direction:column; align-items:center; margin:20px 0 8px; text-align:center; font-size:20px; }
+    .arrow { font-family:Arial,sans-serif; font-size:44px; line-height:1.15; }
+    .tools-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px; }
+    .tool-card { border:1px dashed #888; padding:16px; display:flex; flex-direction:column; align-items:stretch; gap:12px; min-width:0; }
+    .tool-card h3 { font-size:24px; overflow-wrap:anywhere; }
+    .tool-card.connected { border:2px dashed #444; padding:15px; background:#f5f5f5; }
+    .tool-status { font-size:16px; min-height:72px; color:var(--muted); }
+    .tool-card > button { width:100%; font-size:18px; padding:10px 8px; }
+    .tool-card .text-button { border:0; background:transparent; padding:6px 2px; min-height:44px; font-size:17px; text-decoration:underline; text-decoration-style:dashed; }
+    .tool-card > button:first-of-type { margin-top:auto; }
+    .read-only { margin-top:20px; border:2px dashed #555; padding:14px 18px; font-size:22px; background:var(--wash); }
+    .status { min-height:28px; margin-top:12px; font-size:17px; }
+    .project-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px; }
+    .project-header h3 { font-size:28px; }
+    .example-note { font-size:17px; color:var(--muted); margin-bottom:20px; }
+    .context-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .context-card { border:1px dashed #888; padding:18px; min-width:0; scroll-margin-top:20px; }
+    .source { display:inline-block; border:1px dashed #999; padding:3px 8px; font-size:15px; background:#f5f5f5; margin-bottom:12px; }
+    .context-card h3 { font-size:23px; margin-bottom:8px; }
+    .context-card p { font-size:19px; }
+    .context-card p + p { margin-top:8px; }
+    .full-width { grid-column:1 / -1; }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:18px; }
+    th,td { text-align:left; vertical-align:top; border:1px dashed #999; padding:10px 12px; }
+    th { background:#f3f3f3; font-size:16px; font-weight:650; }
+    .conflict { border:2px dashed #444; padding:20px; background:#f3f3f3; margin-top:22px; }
+    .conflict h3 { font-size:26px; margin-bottom:8px; }
+    .date-options { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
+    .date-option { border:1px dashed #888; padding:14px; background:#fff; }
+    .date-option strong { display:block; font-size:23px; margin-top:5px; }
+    .button-row { display:flex; flex-wrap:wrap; gap:12px; }
+    .button-row button { flex:1; }
+    .button-row button[aria-pressed=true] { background:#ccc; border:2px dashed #222; }
+    .review-setting { border:2px dashed #555; padding:18px; margin-bottom:20px; background:var(--wash); }
+    .toggle-label { display:flex; align-items:center; gap:14px; cursor:pointer; font-size:22px; }
+    .toggle-label input { position:absolute; opacity:0; width:1px; height:1px; }
+    .switch { width:56px; height:30px; flex:0 0 56px; background:#eee; border:2px dashed #666; padding:3px; display:flex; align-items:center; }
+    .switch::before { content:""; display:block; width:18px; height:18px; background:#555; }
+    .toggle-label input:checked + .switch { background:#ccc; justify-content:flex-end; }
+    .toggle-label input:focus-visible + .switch { outline:3px solid #222; outline-offset:4px; }
+    .review-setting p { margin-top:10px; font-size:17px; color:var(--muted); }
+    .actions-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .action-card { border:2px dashed #666; padding:20px; min-width:0; }
+    .action-heading { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+    .action-heading h3 { font-size:25px; }
+    .field-label { display:block; color:var(--muted); font-size:16px; margin-top:14px; margin-bottom:4px; }
+    .action-title { font-size:21px; font-weight:600; margin-bottom:10px; }
+    .provenance { font-size:16px; border-top:1px dashed #999; padding-top:12px; margin-top:16px; color:var(--muted); }
+    .provenance a { display:inline-block; margin-top:5px; }
+    .action-card > .button-row { margin-top:18px; }
+    .action-card .button-row button { padding:10px 12px; font-size:19px; }
+    .editor { margin-top:18px; border:1px dashed #777; padding:16px; background:var(--wash); }
+    .editor label { display:block; font-size:16px; margin-bottom:12px; font-weight:600; }
+    .editor input,.editor textarea { display:block; width:100%; border:1px dashed #777; border-radius:0; background:#fff; padding:9px 11px; margin-top:5px; font-size:18px; font-weight:400; }
+    .editor textarea { min-height:130px; resize:vertical; }
+    .editor .button-row button { font-size:17px; }
+    .deleted { background:#f5f5f5; }
+    .pull-log { margin-top:26px; border-top:2px dashed #888; padding-top:20px; }
+    .pull-log h3 { font-size:24px; margin-bottom:8px; }
+    .pull-log .small-note { margin-bottom:14px; }
+    .feedback { margin-top:38px; border-top:2px dashed var(--ink); padding-top:24px; }
+    .feedback h2 { margin-bottom:18px; }
+    .questions { padding-left:28px; margin:0 0 22px; }
+    .questions li { font-size:21px; padding-left:5px; margin-bottom:10px; }
+    .notes { display:block; width:100%; min-height:260px; border:2px dashed #777; border-radius:0; padding:0 14px; line-height:43px; font-size:20px; resize:vertical; background:repeating-linear-gradient(to bottom,#fff 0,#fff 42px,#bbb 42px,#bbb 43px); }
+    .page-footer { margin-top:28px; border-top:1px dashed var(--line); padding-top:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:15px; color:var(--muted); }
+    .reset { min-height:44px; font-size:16px; padding:7px 14px; }
+    @media (max-width:1100px) { .page { padding:28px 24px; } .tools-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } .tool-status { min-height:48px; } }
+    @media (max-width:850px) { .actions-grid,.context-grid { grid-template-columns:1fr; } .tool-status { min-height:72px; } }
+    @media (max-width:650px) {
+      .page { padding:22px 16px; }
+      h2 { font-size:25px; }
+      .scenario { font-size:20px; }
+      .window-body { padding:16px; }
+      .tools-grid { grid-template-columns:1fr 1fr; }
+      .tool-card { padding:12px; }
+      .tool-card.connected { padding:11px; }
+      .date-options { grid-template-columns:1fr; }
+      .button-row { flex-direction:column; }
+      .action-card { padding:16px; }
+      .toggle-label { font-size:20px; }
+      th,td { padding:9px; font-size:16px; }
+    }
+    @media (max-width:400px) { .tools-grid { grid-template-columns:1fr; } .tool-status { min-height:0; } }
+    @media print {
+      html { scroll-behavior:auto; }
+      .page { max-width:none; padding:0; }
+      .flow-nav,.reset,.editor { display:none; }
+      .screen + .flow + .screen { break-before:page; }
+      .tool-card,.context-card,.conflict,.action-card,.feedback { break-inside:avoid; }
+      .tools-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .context-grid,.actions-grid { grid-template-columns:1fr 1fr; }
+      .button-row { flex-direction:row; }
+      .flow { margin:12px 0; }
+      a { text-decoration:none; }
+    }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="page-header">
+    <div class="header-top"><span class="eyebrow">LuMaCo / Concept sketch 04</span><span class="badge">Low-fidelity · Fictional example</span></div>
+    <h1>LuMaCo Prototype: Current Integrations</h1>
+    <p class="scenario">Your workflow already works. Bring one project's context together without retyping it.</p>
+    <p class="context">Keep using your email, calendar, chat, CRM, and spreadsheets. Review suggestions, then file back into your existing tools.</p>
+    <p class="context">All data and connections are fictional. Controls change this page only; no external tools are connected or changed.</p>
+    <nav class="flow-nav" aria-label="Prototype screen flow"><a href="#connect">1. Connect</a><span aria-hidden="true">→</span><a href="#project">2. Pull context together</a><span aria-hidden="true">→</span><a href="#review">3. Review actions</a><span aria-hidden="true">→</span><a href="#feedback">Feedback notes</a></nav>
+  </header>
+
+  <section class="screen" id="connect" aria-labelledby="connect-title">
+    <div class="screen-title"><span class="step" aria-hidden="true">1</span><div><h2 id="connect-title">Connect the tools you already use</h2><p class="screen-description">Choose useful sources. You can start with one and leave the rest for later.</p></div></div>
+    <div class="window">
+      <div class="window-bar"><strong>Your existing desktop tools</strong><span>Source access / Read-only</span></div>
+      <div class="window-body">
+        <div class="tools-grid">
+          <article class="tool-card connected" id="tool-email"><h3>Email</h3><p class="small-note">Customer conversations</p><p class="tool-status" id="status-email">Connected, you can disconnect anytime.</p><button type="button" id="connect-email" disabled>Connect</button><button class="text-button" id="later-email" type="button" disabled>Not now</button><button class="text-button" id="disconnect-email" type="button">Disconnect</button></article>
+          <article class="tool-card" id="tool-calendar"><h3>Calendar</h3><p class="small-note">Meetings and next steps</p><p class="tool-status" id="status-calendar">Not connected</p><button type="button" id="connect-calendar">Connect</button><button class="text-button" id="later-calendar" type="button">Not now</button><button class="text-button" id="disconnect-calendar" type="button" hidden>Disconnect</button></article>
+          <article class="tool-card" id="tool-chat"><h3>Chat</h3><p class="small-note">Decisions from messages</p><p class="tool-status" id="status-chat">Not connected</p><button type="button" id="connect-chat">Connect</button><button class="text-button" id="later-chat" type="button">Not now</button><button class="text-button" id="disconnect-chat" type="button" hidden>Disconnect</button></article>
+          <article class="tool-card" id="tool-crm"><h3>CRM</h3><p class="small-note">Customer history</p><p class="tool-status" id="status-crm">Not connected</p><button type="button" id="connect-crm">Connect</button><button class="text-button" id="later-crm" type="button">Not now</button><button class="text-button" id="disconnect-crm" type="button" hidden>Disconnect</button></article>
+          <article class="tool-card" id="tool-spreadsheets"><h3>Spreadsheets</h3><p class="small-note">Project and order details</p><p class="tool-status" id="status-spreadsheets">Not connected</p><button type="button" id="connect-spreadsheets">Connect</button><button class="text-button" id="later-spreadsheets" type="button">Not now</button><button class="text-button" id="disconnect-spreadsheets" type="button" hidden>Disconnect</button></article>
+        </div>
+        <p class="read-only">Read-only to start. Nothing changes in the original tool.</p>
+        <p class="status" id="connection-status" role="status" aria-live="polite">Email shows a connected example. The other tools are optional.</p>
+      </div>
+      <div class="window-footer">Use the sources that earn their place in your workflow. You choose what to connect.</div>
+    </div>
+  </section>
+
+  <div class="flow" aria-label="Flow: choose a customer and bring its context together"><span class="arrow" aria-hidden="true">↓</span><span>Choose one customer / project → pull the relevant context</span><span class="arrow" aria-hidden="true">↓</span></div>
+
+  <section class="screen" id="project" aria-labelledby="project-title">
+    <div class="screen-title"><span class="step" aria-hidden="true">2</span><div><h2 id="project-title">One project, pulled together</h2><p class="screen-description">One view of the details, with a source you can check for every item.</p></div></div>
+    <div class="window">
+      <div class="window-bar"><strong>Customer A / Project 01</strong><span>Example after connecting all five sources</span></div>
+      <div class="window-body">
+        <div class="project-header"><div><h3>Customer A / Project 01</h3><p class="small-note">Current order · Ship date to confirm</p></div><span class="badge">5 items / 5 sources</span></div>
+        <p class="example-note">Illustrative result using all five tools. These sample items stay visible while you explore the connection choices above.</p>
+        <div class="context-grid">
+          <article class="context-card" id="source-email"><span class="source">From: Email, Oct 24 · Thread: Delivery schedule</span><h3>Email thread excerpt</h3><p><strong>Customer contact → You</strong></p><p>“Please use Thursday, October 29 as the ship date for this order. Can you confirm before our next call?”</p></article>
+          <article class="context-card" id="source-calendar"><span class="source">From: Calendar, Oct 25 · Invite: Project check-in</span><h3>Calendar invite</h3><p><strong>Customer A / Project check-in</strong></p><p>Wednesday, October 28 · 10:00–10:30 AM</p><p class="small-note">You + customer contact · Agenda: delivery schedule and next steps</p></article>
+          <article class="context-card" id="source-chat"><span class="source">From: Chat, Oct 26 · Project 01 conversation</span><h3>Chat message</h3><p><strong>Operations teammate → You</strong></p><p>“Please confirm the ship date before we make the final delivery arrangements.”</p></article>
+          <article class="context-card" id="source-crm"><span class="source">From: CRM note, Oct 23 · Project 01</span><h3>CRM note</h3><p>“Current planned ship date: Friday, October 30. Awaiting the customer's final confirmation.”</p><p class="small-note">Existing project note · Date differs from the email</p></article>
+          <article class="context-card full-width" id="source-spreadsheets"><span class="source">From: Spreadsheets, Oct 22 · Order list / Row 12</span><h3>Spreadsheet row</h3><div class="table-wrap"><table aria-label="One pulled spreadsheet row"><thead><tr><th scope="col">Customer</th><th scope="col">Project</th><th scope="col">Order quantity</th><th scope="col">Status</th></tr></thead><tbody><tr><td>Customer A</td><td>Project 01</td><td>24 units</td><td>Awaiting ship-date confirmation</td></tr></tbody></table></div></article>
+        </div>
+        <aside class="conflict" aria-labelledby="conflict-title"><h3 id="conflict-title">Conflict, you decide</h3><p>The same deliverable, “Order ship date,” has two different dates.</p><div class="date-options"><div class="date-option"><a class="small-note" href="#source-email">From: Email, Oct 24</a><strong>Thursday, October 29</strong></div><div class="date-option"><a class="small-note" href="#source-crm">From: CRM note, Oct 23</a><strong>Friday, October 30</strong></div></div><div class="button-row"><button id="use-email" type="button" aria-pressed="false">Use email date</button><button id="use-crm" type="button" aria-pressed="false">Use CRM date</button><button id="keep-both" type="button" aria-pressed="false">Keep both</button></div><p class="status" id="conflict-status" role="status" aria-live="polite">No date chosen. Choose a date or Keep both before approving a draft below.</p><p class="small-note">Your choice updates the suggested actions. Both source entries stay unchanged.</p></aside>
+      </div>
+      <div class="window-footer">Each source stays visible. A conflicting date becomes a decision for you.</div>
+    </div>
+  </section>
+
+  <div class="flow" aria-label="Flow: review proposed actions before filing"><span class="arrow" aria-hidden="true">↓</span><span>Review the context → approve only the actions you want</span><span class="arrow" aria-hidden="true">↓</span></div>
+
+  <section class="screen" id="review" aria-labelledby="review-title">
+    <div class="screen-title"><span class="step" aria-hidden="true">3</span><div><h2 id="review-title">Review before anything is filed</h2><p class="screen-description">Two suggested actions, ready for review. Their destinations are tools you already use.</p></div></div>
+    <div class="window">
+      <div class="window-bar"><strong>Customer A / Project 01 / Suggested actions</strong><span id="review-count">0 of 2 approved</span></div>
+      <div class="window-body">
+        <div class="review-setting"><label class="toggle-label"><input id="ask-first" type="checkbox" role="switch" checked aria-describedby="preference-status"><span class="switch" aria-hidden="true"></span><span>Ask me before filing anything</span></label><p id="preference-status">On. Every suggested action waits for your approval.</p><p class="small-note">Illustrative preference. These two drafts always use the approval buttons below.</p></div>
+        <div class="actions-grid">
+          <article class="action-card" id="task-card">
+            <div class="action-heading"><h3>Follow-up task</h3><span class="badge" id="task-state">Draft / Not filed</span></div>
+            <div id="task-content"><p class="action-title" id="task-title">Confirm the order ship date with the customer</p><p id="task-body">Email lists October 29; the CRM lists October 30. Confirm the correct date before the October 28 check-in.</p><span class="field-label">Due</span><p id="task-date">October 27 · 9:00 AM</p><span class="field-label">Destination</span><p id="task-destination">CRM / Project 01 / Tasks</p><p class="provenance">Drafted from:<br><a href="#source-email">Email, Oct 24</a> · <a href="#source-crm">CRM note, Oct 23</a> · <a href="#source-calendar">Calendar, Oct 25</a></p></div>
+            <form class="editor" id="task-editor" hidden><label>Task title<input id="task-title-input" value="Confirm the order ship date with the customer" required></label><label>Details<textarea id="task-body-input" required>Email lists October 29; the CRM lists October 30. Confirm the correct date before the October 28 check-in.</textarea></label><label>Due<input id="task-date-input" value="October 27 · 9:00 AM" required></label><label>Destination<input id="task-destination-input" value="CRM / Project 01 / Tasks" required></label><div class="button-row"><button type="submit">Apply edits</button><button type="button" id="task-cancel">Cancel</button></div></form>
+            <div class="button-row"><button class="primary" id="task-approve" type="button">Approve</button><button id="task-edit" type="button" aria-expanded="false" aria-controls="task-editor">Edit</button><button id="task-delete" type="button">Delete</button></div>
+            <p class="status" id="task-status" role="status" aria-live="polite">Review the date conflict above before approval.</p>
+          </article>
+          <article class="action-card" id="note-card">
+            <div class="action-heading"><h3>Project note to file</h3><span class="badge" id="note-state">Draft / Not filed</span></div>
+            <div id="note-content"><p class="action-title" id="note-title">Delivery schedule / Context for the next call</p><p id="note-body">Customer A's order is 24 units. Email requests an October 29 ship date; the CRM currently says October 30. Operations needs confirmation before arranging delivery. Customer check-in: October 28 at 10:00 AM.</p><span class="field-label">Destination</span><p id="note-destination">CRM / Project 01 / Notes</p><p class="provenance">Drafted from:<br><a href="#source-email">Email, Oct 24</a> · <a href="#source-crm">CRM note, Oct 23</a> · <a href="#source-chat">Chat, Oct 26</a> · <a href="#source-calendar">Calendar, Oct 25</a> · <a href="#source-spreadsheets">Spreadsheet row, Oct 22</a></p></div>
+            <form class="editor" id="note-editor" hidden><label>Note title<input id="note-title-input" value="Delivery schedule / Context for the next call" required></label><label>Project note<textarea id="note-body-input" required>Customer A's order is 24 units. Email requests an October 29 ship date; the CRM currently says October 30. Operations needs confirmation before arranging delivery. Customer check-in: October 28 at 10:00 AM.</textarea></label><label>Destination<input id="note-destination-input" value="CRM / Project 01 / Notes" required></label><div class="button-row"><button type="submit">Apply edits</button><button type="button" id="note-cancel">Cancel</button></div></form>
+            <div class="button-row"><button class="primary" id="note-approve" type="button">Approve</button><button id="note-edit" type="button" aria-expanded="false" aria-controls="note-editor">Edit</button><button id="note-delete" type="button">Delete</button></div>
+            <p class="status" id="note-status" role="status" aria-live="polite">Review and edit before filing. Nothing saved yet.</p>
+          </article>
+        </div>
+        <section class="pull-log" aria-labelledby="log-title"><h3 id="log-title">What was pulled, from where, and when</h3><p class="small-note">Illustrative pull log · October 26 · Source dates above show when each original item was written.</p><div class="table-wrap"><table aria-label="Source pull log"><thead><tr><th scope="col">What</th><th scope="col">From which tool</th><th scope="col">When pulled</th></tr></thead><tbody id="log-body"><tr><td>Delivery schedule thread</td><td>Email</td><td>Oct 26 · 8:05 AM</td></tr><tr><td>Project check-in invite</td><td>Calendar</td><td>Oct 26 · 8:05 AM</td></tr><tr><td>Ship-date confirmation message</td><td>Chat</td><td>Oct 26 · 8:05 AM</td></tr><tr><td>Existing delivery plan note</td><td>CRM</td><td>Oct 26 · 8:05 AM</td></tr><tr><td>Order list / Row 12</td><td>Spreadsheets</td><td>Oct 26 · 8:05 AM</td></tr></tbody></table></div></section>
+      </div>
+      <div class="window-footer">Approve previews filing into the labeled destination. Edit changes the draft. Delete removes only the suggestion. No original tool changes in this demo.</div>
+    </div>
+  </section>
+
+  <section class="feedback" id="feedback" aria-labelledby="feedback-title"><h2 id="feedback-title">Feedback notes</h2><ol class="questions"><li>Which tools does this have to pull from first?</li><li>What would a wrong pull break in your process?</li><li>Would you trust an auto-filed note without checking it?</li><li>How should duplicates and conflicts be handled?</li><li>What control do you need to edit, approve, or delete a pulled item?</li><li>What would make this feel like one more system to maintain?</li></ol><textarea class="notes" aria-label="Feedback notes" spellcheck="false"></textarea></section>
+  <footer class="page-footer"><span>LuMaCo / Current Integrations / Fictional discussion prototype</span><button class="reset" id="reset" type="button">Reset demo</button><span>Changes reset on reload</span></footer>
+</main>
+<script>
+  (() => {
+    const el = id => document.getElementById(id);
+    const tools = ['email','calendar','chat','crm','spreadsheets'];
+    const names = {email:'Email',calendar:'Calendar',chat:'Chat',crm:'CRM',spreadsheets:'Spreadsheets'};
+    let decision = null;
+    const states = {task:'draft',note:'draft'};
+    const setConnection = (tool,connected) => {
+      el('tool-'+tool).classList.toggle('connected',connected);
+      el('status-'+tool).textContent = connected ? 'Connected, you can disconnect anytime.' : 'Not connected';
+      el('connect-'+tool).disabled = connected;
+      el('later-'+tool).disabled = connected;
+      el('disconnect-'+tool).hidden = !connected;
+      el('connection-status').textContent = names[tool] + (connected ? ' connected in this demo. Read-only source access.' : ' disconnected in this demo. Original items remain unchanged.') + ' The project view below is a separate illustrated example.';
+    };
+    tools.forEach(tool => {
+      el('connect-'+tool).addEventListener('click',() => setConnection(tool,true));
+      el('disconnect-'+tool).addEventListener('click',() => setConnection(tool,false));
+      el('later-'+tool).addEventListener('click',() => {
+        el('status-'+tool).textContent = 'Skipped for now';
+        el('connection-status').textContent = names[tool] + ' left for later. You can connect it whenever it becomes useful.';
+      });
+    });
+    const setEditor = (kind,open) => {
+      el(kind+'-editor').hidden = !open;
+      el(kind+'-edit').setAttribute('aria-expanded',String(open));
+    };
+    const fields = kind => kind === 'task' ? ['title','body','date','destination'] : ['title','body','destination'];
+    const finish = (kind,state) => {
+      states[kind] = state;
+      setEditor(kind,false);
+      ['approve','edit','delete'].forEach(action => { el(kind+'-'+action).disabled = true; });
+      el('review-count').textContent = Object.values(states).filter(value => value === 'approved').length + ' of 2 approved';
+    };
+    const updateDrafts = () => {
+      const date = decision === 'email' ? 'Thursday, October 29 (email date)' : decision === 'crm' ? 'Friday, October 30 (CRM date)' : 'October 29 from Email and October 30 from CRM; both retained pending confirmation';
+      if (states.task === 'draft') {
+        el('task-body').textContent = decision === 'both' ? 'Both dates are retained. Ask the customer to confirm the correct ship date before the October 28 check-in.' : 'Use '+date+' as the working ship date. Confirm it with the customer before the October 28 check-in.';
+      }
+      if (states.note === 'draft') {
+        el('note-body').textContent = 'Customer A’s order is 24 units. Ship date decision: '+date+'. Operations needs confirmation before arranging delivery. Customer check-in: October 28 at 10:00 AM. Original email and CRM entries remain unchanged.';
+      }
+    };
+    [['use-email','email'],['use-crm','crm'],['keep-both','both']].forEach(([id,value]) => {
+      el(id).addEventListener('click',() => {
+        if (Object.values(states).every(state => state !== 'draft')) {
+          el('conflict-status').textContent = 'Both drafts have been reviewed. Use Reset demo to explore a different date decision.';
+          return;
+        }
+        if (['task','note'].some(kind => !el(kind+'-editor').hidden)) {
+          el('conflict-status').textContent = 'Apply or cancel your open edits before changing the date decision.';
+          return;
+        }
+        decision = value;
+        ['use-email','use-crm','keep-both'].forEach(button => el(button).setAttribute('aria-pressed',String(button === id)));
+        el('conflict-status').textContent = value === 'both' ? 'Both dates retained. The drafts will explicitly ask for confirmation.' : 'Working date selected: '+(value === 'email' ? 'October 29 from Email.' : 'October 30 from CRM.');
+        updateDrafts();
+      });
+    });
+    ['task','note'].forEach(kind => {
+      el(kind+'-edit').addEventListener('click',() => {
+        if (states[kind] !== 'draft') return;
+        fields(kind).forEach(field => { el(kind+'-'+field+'-input').value = el(kind+'-'+field).textContent; });
+        setEditor(kind,true);
+        el(kind+'-status').textContent = 'Editing this draft. Nothing filed yet.';
+        el(kind+'-title-input').focus();
+      });
+      el(kind+'-cancel').addEventListener('click',() => {
+        setEditor(kind,false);
+        el(kind+'-status').textContent = 'Edits canceled. The draft is still awaiting approval.';
+        el(kind+'-edit').focus();
+      });
+      el(kind+'-editor').addEventListener('submit',event => {
+        event.preventDefault();
+        if (states[kind] !== 'draft') return;
+        if (fields(kind).some(field => !el(kind+'-'+field+'-input').value.trim())) {
+          el(kind+'-status').textContent = 'Fill in each field before applying edits.';
+          return;
+        }
+        fields(kind).forEach(field => { el(kind+'-'+field).textContent = el(kind+'-'+field+'-input').value.trim(); });
+        setEditor(kind,false);
+        el(kind+'-status').textContent = 'Edits applied to the draft. Select Approve when ready.';
+        el(kind+'-edit').focus();
+      });
+      el(kind+'-approve').addEventListener('click',() => {
+        if (states[kind] !== 'draft') return;
+        if (!decision) {
+          el(kind+'-status').textContent = 'Choose a date or Keep both in the conflict box before approval.';
+          return;
+        }
+        if (!el(kind+'-editor').hidden) {
+          el(kind+'-status').textContent = 'Apply or cancel your edits before approving.';
+          return;
+        }
+        finish(kind,'approved');
+        el(kind+'-state').textContent = 'Approved / Demo only';
+        el(kind+'-status').textContent = 'Approved for '+el(kind+'-destination').textContent+' in this demo. No real tool was changed.';
+      });
+      el(kind+'-delete').addEventListener('click',() => {
+        if (states[kind] !== 'draft') return;
+        finish(kind,'deleted');
+        el(kind+'-content').hidden = true;
+        el(kind+'-card').classList.add('deleted');
+        el(kind+'-state').textContent = 'Suggestion deleted';
+        el(kind+'-status').textContent = 'Draft suggestion removed. The original source items remain unchanged.';
+      });
+    });
+    el('ask-first').addEventListener('change',() => {
+      el('preference-status').textContent = el('ask-first').checked ? 'On. Every suggested action waits for your approval.' : 'Off in this preference preview. These existing drafts still await your approval; nothing is filed automatically in this demo.';
+    });
+    el('reset').addEventListener('click',() => window.location.reload());
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="A fictional personal touchpoint log: call ended, draft reviewed, customer history updated.">
+  <title>LuMaCo Prototype: Comm. Scraper</title>
+  <style>
+    :root { --ink:#222; --muted:#595959; --line:#888; --wash:#f3f3f3; --sketch:"Segoe Print","Bradley Hand","Comic Sans MS","Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; scroll-padding-top:24px; }
+    body { margin:0; background:#fff; color:var(--ink); font:19px/1.5 "Segoe UI",Arial,sans-serif; }
+    h1,h2,h3,p { margin:0; }
+    h1,h2,h3,.step,.flow,.call-mark { font-family:var(--sketch); }
+    a { color:inherit; text-underline-offset:4px; }
+    button,input,textarea { font:inherit; color:inherit; }
+    a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible { outline:3px solid #222; outline-offset:4px; }
+    button { cursor:pointer; border:2px dashed #444; border-radius:0; background:#fff; padding:12px 24px; min-height:56px; font-size:21px; font-weight:650; }
+    button:hover { background:#eee; }
+    button:disabled { cursor:default; color:#666; background:#eee; }
+    button.primary { background:#ddd; }
+    button.primary:hover:not(:disabled) { background:#ccc; }
+    [hidden] { display:none !important; }
+    .page { max-width:1400px; margin:auto; padding:38px 42px 48px; }
+    .page-header { border-bottom:2px dashed var(--ink); padding-bottom:26px; }
+    .header-top { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px; }
+    .eyebrow { font-size:15px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; }
+    .badge { display:inline-block; border:1px dashed #777; padding:4px 10px; font-size:15px; background:#fff; }
+    h1 { font-size:clamp(30px,3.2vw,43px); line-height:1.3; }
+    .scenario { margin-top:14px; font-size:22px; }
+    .context { color:var(--muted); margin-top:8px; font-size:17px; }
+    .flow-nav { display:flex; flex-wrap:wrap; align-items:center; gap:14px; padding-top:20px; font-size:18px; }
+    .flow-nav a { text-decoration-style:dashed; }
+    .screen { margin-top:28px; scroll-margin-top:24px; }
+    .screen-title { display:flex; align-items:flex-start; gap:15px; margin-bottom:16px; }
+    .step { width:44px; height:44px; flex:0 0 44px; display:grid; place-items:center; border:2px dashed var(--ink); font-size:25px; font-weight:700; }
+    h2 { font-size:29px; line-height:1.4; }
+    .screen-description { font-size:18px; color:var(--muted); margin-top:2px; }
+    .window { border:2px dashed var(--ink); }
+    .window-bar { border-bottom:1px dashed var(--line); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; background:var(--wash); font-size:16px; }
+    .window-bar strong { font-size:18px; }
+    .window-body { padding:24px; }
+    .window-footer { border-top:1px dashed var(--line); padding:12px 22px; font-size:16px; color:var(--muted); }
+    .small-note { font-size:16px; color:var(--muted); }
+    .trigger-grid { display:grid; grid-template-columns:1.7fr 1fr; gap:24px; align-items:start; }
+    .call-panel { border:2px dashed #555; padding:22px; }
+    .call-heading { display:flex; align-items:center; gap:16px; padding-bottom:18px; margin-bottom:18px; border-bottom:1px dashed var(--line); }
+    .call-mark { width:56px; height:56px; display:grid; place-items:center; border:2px dashed #555; font-size:28px; }
+    h3 { font-size:26px; }
+    .contact-name { font-size:25px; font-weight:650; }
+    .contact-role { color:var(--muted); font-size:18px; margin-top:3px; }
+    .call-meta { display:flex; flex-wrap:wrap; gap:20px 40px; margin:20px 0 0; }
+    .call-meta div { min-width:115px; }
+    dt { color:var(--muted); font-size:16px; margin-bottom:3px; }
+    dd { margin:0; font-size:21px; }
+    .alternate { border:1px dashed #777; padding:18px; }
+    .alternate h3 { font-size:23px; margin:10px 0; }
+    .alternate p + p { margin-top:8px; }
+    .drafting { margin-top:24px; border:1px dashed #555; padding:14px 18px; background:var(--wash); font-size:23px; font-family:var(--sketch); }
+    .drafting .small-note { display:block; font-family:"Segoe UI",Arial,sans-serif; margin-top:4px; }
+    .flow { display:flex; flex-direction:column; align-items:center; margin:20px 0 8px; text-align:center; font-size:20px; }
+    .arrow { font-family:Arial,sans-serif; font-size:44px; line-height:1.15; }
+    .record-heading { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:20px; }
+    .record-heading h3 { font-size:28px; }
+    .record-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px 24px; }
+    .field { display:block; min-width:0; }
+    .field > span { display:block; font-size:16px; color:var(--muted); margin-bottom:5px; }
+    .field input,.field textarea { display:block; width:100%; min-width:0; border:1px dashed #777; border-radius:0; padding:11px 13px; background:#fff; font-size:20px; }
+    .field textarea { resize:vertical; min-height:100px; }
+    .field input[readonly],.field textarea[readonly] { cursor:default; }
+    .editing input,.editing textarea { background:#f5f5f5; border:2px dashed #333; padding:10px 12px; }
+    .full-width { grid-column:1 / -1; }
+    .reminder-field { border:2px dashed #555; padding:14px; background:var(--wash); }
+    .reminder-field > span { font-weight:700; color:var(--ink); }
+    .source { margin-top:18px; padding-top:16px; border-top:1px dashed var(--line); font-size:17px; color:var(--muted); }
+    .review-note { margin:18px 0 14px; font-size:18px; }
+    .button-row { display:flex; flex-wrap:wrap; gap:14px; }
+    .button-row button { flex:1; }
+    .status { min-height:28px; margin-top:14px; font-size:17px; }
+    .next-link { display:inline-block; margin-top:8px; font-size:17px; }
+    .customer-heading { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px; }
+    .customer-heading h3 { font-size:28px; }
+    .pinned { border:2px dashed #444; background:#eee; padding:18px; margin-bottom:24px; }
+    .pinned .eyebrow { margin-bottom:7px; }
+    .pinned h3 { font-size:24px; margin-bottom:7px; }
+    .preview-note { font-size:17px; color:var(--muted); margin:0 0 20px; }
+    .timeline-label { display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
+    .timeline-label h3 { font-size:23px; }
+    .timeline { list-style:none; margin:0 0 0 8px; padding:0 0 0 25px; border-left:2px dashed #888; }
+    .timeline li { position:relative; padding-bottom:20px; }
+    .timeline li:last-child { padding-bottom:0; }
+    .timeline li::before { content:""; position:absolute; left:-32px; top:22px; width:10px; height:10px; border:2px solid #666; background:#fff; }
+    .timeline-card { border:1px dashed #888; padding:18px; }
+    .timeline-card.new { border:2px dashed #444; }
+    .event-meta { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px 20px; margin-bottom:9px; }
+    .event-meta strong { font-size:21px; }
+    .event-meta time { font-size:17px; color:var(--muted); }
+    .event-title { margin-bottom:7px; font-weight:600; }
+    .event-details { border-top:1px dashed #999; margin-top:12px; padding-top:12px; font-size:17px; }
+    .tag { display:inline-block; border:1px dashed #777; padding:2px 9px; background:#f5f5f5; font-size:15px; margin-top:10px; }
+    .empty-state { border:1px dashed #888; padding:18px; margin-bottom:24px; }
+    .page-footer { margin-top:28px; border-top:1px dashed var(--line); padding-top:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:15px; color:var(--muted); }
+    .reset { min-height:44px; font-size:16px; padding:7px 14px; }
+    @media (max-width:900px) { .page { padding:28px 24px; } .trigger-grid { grid-template-columns:1fr; gap:18px; } .alternate { max-width:600px; } }
+    @media (max-width:650px) {
+      .page { padding:22px 16px; }
+      .header-top { align-items:flex-start; flex-direction:column; gap:9px; }
+      h2 { font-size:25px; }
+      .scenario { font-size:20px; }
+      .window-body { padding:16px; }
+      .call-panel { padding:16px; }
+      .record-grid { grid-template-columns:1fr; }
+      .button-row { flex-direction:column; }
+      .field input,.field textarea { font-size:18px; }
+      .timeline { padding-left:20px; }
+      .timeline li::before { left:-27px; }
+      .timeline-card { padding:14px; }
+    }
+    @media print {
+      html { scroll-behavior:auto; }
+      .page { max-width:none; padding:0; }
+      .flow-nav,.reset,.next-link { display:none; }
+      .screen { break-inside:avoid; }
+      .screen + .flow + .screen { break-before:page; }
+      .trigger-grid { grid-template-columns:1.6fr 1fr; }
+      .record-grid { grid-template-columns:1fr 1fr; }
+      .field input,.field textarea { font-size:16px; }
+      .button-row { flex-direction:row; }
+      .flow { margin:12px 0; }
+      a { text-decoration:none; }
+    }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="page-header">
+    <div class="header-top"><span class="eyebrow">LuMaCo / Concept sketch 02</span><span class="badge">Low-fidelity · Fictional example</span></div>
+    <h1>LuMaCo Prototype: Comm. Scraper</h1>
+    <p class="scenario">A customer call just ended. Jordan typed nothing.</p>
+    <p class="context">Jordan · Manager, Example Company · A personal log of customer conversations</p>
+    <p class="context">Illustrative scenario for discussion. All people, companies, messages, and dates are fictional.</p>
+    <nav class="flow-nav" aria-label="Prototype screen flow"><a href="#trigger">1. Call ended</a><span aria-hidden="true">→</span><a href="#draft">2. Review the draft</a><span aria-hidden="true">→</span><a href="#customer">3. Customer timeline</a></nav>
+  </header>
+
+  <section class="screen" id="trigger" aria-labelledby="trigger-title">
+    <div class="screen-title"><span class="step" aria-hidden="true">1</span><div><h2 id="trigger-title">The trigger moment / A conversation ends</h2><p class="screen-description">A touchpoint draft starts automatically. Jordan has entered nothing.</p></div></div>
+    <div class="window">
+      <div class="window-bar"><strong>My touchpoints / New conversation</strong><span>Jordan · Example Company</span></div>
+      <div class="window-body">
+        <div class="trigger-grid">
+          <article class="call-panel" aria-labelledby="call-title">
+            <div class="call-heading"><span class="call-mark" aria-hidden="true">✓</span><div><h3 id="call-title">Call ended</h3><p class="small-note">Ready for your personal log</p></div></div>
+            <p class="contact-name">Alex Morgan</p><p class="contact-role">Operations Manager · Customer A</p>
+            <dl class="call-meta"><div><dt>Date</dt><dd>Monday, Oct 26</dd></div><div><dt>Ended at</dt><dd>9:42 AM</dd></div><div><dt>Duration</dt><dd>12 minutes</dd></div></dl>
+          </article>
+          <aside class="alternate" aria-labelledby="alternate-title"><span class="badge">Alternate starting point</span><h3 id="alternate-title">Email thread ended</h3><p><strong>Alex Morgan · Customer A</strong></p><p>Re: Delivery timeline</p><p class="small-note">Your reply sent · 9:42 AM</p><p class="small-note">The same flow creates an email touchpoint draft, with Channel set to Email.</p></aside>
+        </div>
+        <div class="drafting">Drafting your touchpoint record...<span class="small-note">A draft for your review. Nothing added to your customer history yet.</span></div>
+      </div>
+      <div class="window-footer">A conversation becomes a draft without retyping the details.</div>
+    </div>
+  </section>
+
+  <div class="flow" aria-label="Flow: create a touchpoint draft automatically"><span class="arrow" aria-hidden="true">↓</span><span>Conversation ends → a filled-in draft is ready</span><span class="arrow" aria-hidden="true">↓</span></div>
+
+  <section class="screen" id="draft" aria-labelledby="draft-title">
+    <div class="screen-title"><span class="step" aria-hidden="true">2</span><div><h2 id="draft-title">The auto-generated record / Review before saving</h2><p class="screen-description">Every field is filled in. Jordan reviews the record and decides what to keep.</p></div></div>
+    <div class="window">
+      <div class="window-bar"><strong>My touchpoints / Draft</strong><span id="draft-state">Awaiting your approval</span></div>
+      <div class="window-body">
+        <div class="record-heading"><div><h3>Your touchpoint draft</h3><p class="small-note">Prepared from the conversation context</p></div><span class="badge" id="entry-note">0 fields typed</span></div>
+        <form id="record-form">
+          <div class="record-grid" id="record-fields">
+            <label class="field"><span>Contact name</span><input id="contact" name="contact" value="Alex Morgan" readonly required></label>
+            <label class="field"><span>Company</span><input id="company" name="company" value="Customer A" readonly required></label>
+            <label class="field"><span>Date and time</span><input id="date-time" name="date-time" value="Oct 26, 2026 · 9:42 AM" readonly required></label>
+            <label class="field"><span>Channel</span><input id="channel" name="channel" value="Call" readonly required></label>
+            <label class="field full-width"><span>Summary</span><textarea id="summary" name="summary" readonly required>Discussed the delivery timeline for the current order. Alex needs a firm ship date before scheduling the team.</textarea></label>
+            <label class="field"><span>Topic tags</span><input id="tags" name="tags" value="Delivery, Scheduling" readonly required></label>
+            <label class="field"><span>Commitment made</span><input id="commitment" name="commitment" value="Send updated delivery date" readonly required></label>
+            <label class="field full-width reminder-field"><span>Follow-up reminder · Already set in this draft</span><input id="reminder" name="reminder" value="Thursday, Oct 29 · 9:00 AM" readonly required></label>
+          </div>
+          <p class="source">Built from the call notes and your last 3 emails with Alex.</p>
+          <p class="review-note">Your approval adds the record and reminder to your personal log.</p>
+          <div class="button-row"><button class="primary" id="confirm" type="submit">Confirm and save</button><button id="edit" type="button">Edit</button><button id="discard" type="button">Discard</button></div>
+        </form>
+        <p class="status" id="review-status" role="status" aria-live="polite">Draft ready. Nothing saved yet.</p>
+        <a class="next-link" href="#customer">See the customer timeline below →</a>
+      </div>
+      <div class="window-footer">Prototype controls change this page only. Reset or reload to start again.</div>
+    </div>
+  </section>
+
+  <div class="flow" aria-label="Flow: only approval adds the record"><span class="arrow" aria-hidden="true">↓</span><span>Confirm and save → the history builds itself</span><span class="arrow" aria-hidden="true">↓</span></div>
+
+  <section class="screen" id="customer" aria-labelledby="customer-title">
+    <div class="screen-title"><span class="step" aria-hidden="true">3</span><div><h2 id="customer-title">The customer timeline / History without data entry</h2><p class="screen-description">The approved touchpoint joins earlier conversations in one customer record.</p></div></div>
+    <div class="window">
+      <div class="window-bar"><strong>My customer log / <span id="breadcrumb-company">Customer A</span></strong><span id="timeline-state">Example after approval</span></div>
+      <div class="window-body">
+        <div class="customer-heading"><div><h3 id="customer-company">Customer A</h3><p id="customer-contact">Alex Morgan · Operations Manager</p></div><span class="badge">Personal customer history</span></div>
+        <p class="preview-note" id="outcome-note">Preview of the result after approval. The call and reminder below are examples until you select Confirm and save.</p>
+        <aside class="pinned" id="pinned-reminder" aria-labelledby="next-title"><p class="eyebrow">Pinned / Next touchpoint</p><h3 id="next-title">Thursday, Oct 29 · 9:00 AM</h3><p id="next-commitment">Send updated delivery date</p><p class="small-note" id="next-contact">Follow up with Alex Morgan at Customer A.</p></aside>
+        <div class="empty-state" id="discard-notice" hidden>Draft discarded. Your earlier conversations stay in place; no new call or reminder was added.</div>
+        <div class="timeline-label"><h3>Conversation history</h3><span class="small-note">Newest first · October 2026</span></div>
+        <ol class="timeline" aria-label="Customer conversation history">
+          <li id="new-call"><article class="timeline-card new"><div class="event-meta"><strong id="event-channel">Call · 12 minutes</strong><time id="event-date" datetime="2026-10-26T09:42:00">Oct 26 · 9:42 AM</time><span class="badge">Just added</span></div><p class="event-title" id="event-contact">Alex Morgan ↔ Jordan</p><p id="event-summary">Discussed the delivery timeline for the current order. Alex needs a firm ship date before scheduling the team.</p><span class="tag" id="event-tags">Delivery, Scheduling</span><p class="event-details">Commitment: <strong id="event-commitment">Send updated delivery date</strong></p></article></li>
+          <li><article class="timeline-card"><div class="event-meta"><strong>Meeting note</strong><time datetime="2026-10-23T14:00:00">Oct 23 · 2:00 PM</time></div><p class="event-title">Order planning with Alex</p><p>Reviewed the order scope and delivery options. Alex will arrange the team once the ship date is confirmed.</p></article></li>
+          <li><article class="timeline-card"><div class="event-meta"><strong>Email</strong><time datetime="2026-10-20T10:15:00">Oct 20 · 10:15 AM</time></div><p class="event-title">Alex → Jordan · Delivery timeline</p><p>Alex asked for the current delivery estimate so the team can plan next steps.</p></article></li>
+        </ol>
+      </div>
+      <div class="window-footer">Review once. Keep the context and next step together, without typing a separate customer record.</div>
+    </div>
+  </section>
+
+  <footer class="page-footer"><span>LuMaCo / Comm. Scraper / Fictional discussion prototype</span><button class="reset" type="button" id="reset">Reset demo</button><span>Changes reset on reload</span></footer>
+</main>
+<script>
+  (() => {
+    const el = id => document.getElementById(id);
+    const fields = ['contact','company','date-time','channel','summary','tags','commitment','reminder'];
+    let finished = false;
+    const lock = () => {
+      fields.forEach(id => { el(id).readOnly = true; });
+      el('record-fields').classList.remove('editing');
+    };
+    const finish = () => {
+      finished = true;
+      lock();
+      ['confirm','edit','discard'].forEach(id => { el(id).disabled = true; });
+      el('reset').focus();
+    };
+    el('edit').addEventListener('click', () => {
+      if (finished) return;
+      fields.forEach(id => { el(id).readOnly = false; });
+      el('record-fields').classList.add('editing');
+      el('entry-note').textContent = 'Your edits';
+      el('review-status').textContent = 'Edit any field, then select Confirm and save. Nothing saved yet.';
+      el('contact').focus();
+    });
+    el('record-form').addEventListener('submit', event => {
+      event.preventDefault();
+      if (finished) return;
+      if (fields.some(id => !el(id).value.trim())) {
+        el('review-status').textContent = 'Please fill in each field before approving the record.';
+        return;
+      }
+      const value = id => el(id).value.trim();
+      el('customer-company').textContent = value('company');
+      el('breadcrumb-company').textContent = value('company');
+      el('customer-contact').textContent = value('contact');
+      el('event-contact').textContent = value('contact') + ' ↔ Jordan';
+      el('event-channel').textContent = value('channel').toLowerCase() === 'call' ? value('channel') + ' · 12 minutes' : value('channel');
+      el('event-date').textContent = value('date-time');
+      el('event-date').removeAttribute('datetime');
+      el('event-summary').textContent = value('summary');
+      el('event-tags').textContent = value('tags');
+      el('event-commitment').textContent = value('commitment');
+      el('next-title').textContent = value('reminder');
+      el('next-commitment').textContent = value('commitment');
+      el('next-contact').textContent = 'Follow up with ' + value('contact') + ' at ' + value('company') + '.';
+      el('draft-state').textContent = 'Approved in this demo';
+      el('entry-note').textContent = 'Reviewed by you';
+      el('timeline-state').textContent = 'After your approval';
+      el('outcome-note').textContent = 'You approved this touchpoint. The record and reminder are now shown in this page’s demo log.';
+      el('review-status').textContent = 'Confirmed and saved in this page’s demo log. Your customer timeline below is updated.';
+      finish();
+    });
+    el('discard').addEventListener('click', () => {
+      if (finished) return;
+      el('new-call').hidden = true;
+      el('pinned-reminder').hidden = true;
+      el('discard-notice').hidden = false;
+      el('draft-state').textContent = 'Discarded';
+      el('timeline-state').textContent = 'Earlier conversations only';
+      el('outcome-note').textContent = 'No new record or reminder added.';
+      el('review-status').textContent = 'Draft discarded. Nothing saved. Select Reset demo to try again.';
+      finish();
+    });
+    el('reset').addEventListener('click', () => window.location.reload());
+  })();
+</script>
+</body>
+</html>
